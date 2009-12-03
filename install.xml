@@ -1,0 +1,28 @@
+<install>
+
+	<version>0.1</version>
+	<author>Luke Malcolm</author>
+	<url>www.lukemalcolm.com</url>
+	
+    <requires>
+	</requires>
+    
+	<add>	
+		<src>
+			<folder name="addons/ofxTextSuite/src">			
+				<file>../../../addons/ofxTextSuite/src/ofxTextBlock.cpp</file>
+				<file>../../../addons/ofxTextSuite/src/ofxTextBlock.h</file>
+				<file>../../../addons/ofxTextSuite/src/ofxTextSuite.h</file>
+			</folder>
+		</src>
+
+		<include>
+			<path>../../../addons/ofxTextSuite/src</path>
+		</include>
+		
+		<link>
+		</link>
+
+	</add>
+	
+</install>
