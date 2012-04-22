@@ -21,6 +21,6 @@
 #define OFXTEXTSUITE_H
 
 #include "ofxTextBlock.h"
-
+#include "ofxTextSequencer.h"
 
 #endif // OFXTEXTSUITE_H
