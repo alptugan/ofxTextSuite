@@ -21,205 +21,202 @@
 
 ofxTextBlock::ofxTextBlock(){
     scale       =   1.0f;
-}
-
-ofxTextBlock::~ofxTextBlock(){
-    //dtor
+    bWraping    =   false;
+    
+    hAlignment  =   OF_TEXT_ALIGN_LEFT;
+    vAlignment  =   OF_TEXT_ALIGN_TOP;  
 }
 
 void ofxTextBlock::init(string fontLocation, float fontSize){
-
-    defaultFont.loadFont(fontLocation, fontSize, true, true);
-
+    font.loadFont(fontLocation, fontSize, true, true);
+    font.setGlobalDpi(90);
+    
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
-    blankSpaceWord.width   = defaultFont.stringWidth ("x");
-    blankSpaceWord.height  = defaultFont.stringHeight("i");
-    blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
-
+    blankSpaceWord.width   = font.stringWidth ("x");
+    blankSpaceWord.height  = font.stringHeight("i");
 }
 
 void ofxTextBlock::setText(string _inputText){
     rawText     = _inputText;
     _loadWords();
-    wrapTextForceLines(1);
-}
-
-void ofxTextBlock::draw(float x, float y){
-    drawLeft(x, y);
-}
-
-void ofxTextBlock::drawLeft(float x, float y){
-
-    string  strToDraw;
-    int     currentWordID;
-    float   drawX;
-    float   drawY;
-
-    float currX = 0;
-
-    if (words.size() > 0){
-        for(int l=0;l < lines.size(); l++){
-            for(int w=0;w < lines[l].wordsID.size(); w++){
-                
-                currentWordID = lines[l].wordsID[w];
-
-                drawX = x + currX;
-                drawY = y + (defaultFont.getLineHeight() * (l + 1));
-                
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b);
-                ofPushMatrix();
-                ofScale(scale, scale, scale);
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
-                currX += words[currentWordID].width;
-                ofPopMatrix();
-
-            }
-            currX = 0;
-
-        }
+    _wrapTextForceLines(1);
+    
+    if ( !bWraping ) {
+        _wrapTextX(width);
+    } else {
+        _wrapTextArea(width, height);
     }
 }
 
-void ofxTextBlock::drawCenter(float x, float y){
-
-    string  strToDraw;
-    int     currentWordID;
-    float   drawX;
-    float   drawY;
-    float   lineWidth;
-
-    float currX = 0;
-
-    if (words.size() > 0) {
-        for(int l=0;l < lines.size(); l++){
-
-            //Get the length of the line.
-            lineWidth = 0;
-            for(int w=0;w < lines[l].wordsID.size(); w++){
-                currentWordID = lines[l].wordsID[w];
-                lineWidth += words[currentWordID].width;
-            }
-
-            for(int w=0;w < lines[l].wordsID.size(); w++){
-                currentWordID = lines[l].wordsID[w];
-
-                drawX = -(lineWidth / 2) + currX;
-                drawY = defaultFont.getLineHeight() * (l + 1);
-
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b);
-
-                ofPushMatrix();
-                //Move to central point using pre-scaled co-ordinates
-                ofTranslate(x, y, 0.0f);
-                ofScale(scale, scale, scale);
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
-                currX += words[currentWordID].width;
-                ofPopMatrix();
-
-            }
-            currX = 0;
-
-        }
-    }
+ofxTextBlock& ofxTextBlock::setAlignment(ofxHorizontalAlignment _hAlignment, ofxVerticalAlignment _vAlignment){
+    hAlignment = _hAlignment;
+    vAlignment = _vAlignment;
+    
+    return * this;
 }
 
-void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
-
-    string  strToDraw;
-    int     currentWordID;
-    float   drawX;
-    float   drawY;
-    int     spacesN;
-    float   nonSpaceWordWidth;
-    float   pixelsPerSpace;
-
-    float currX = 0;
-
-    if (words.size() > 0) {
-
-
-        for(int l=0;l < lines.size(); l++){
-            //Find number of spaces and width of other words;
-            spacesN = 0;
-            nonSpaceWordWidth = 0;
-
-            for(int w = 0; w < lines[l].wordsID.size(); w++){
-                currentWordID = lines[l].wordsID[w];
-                if (words[currentWordID].rawWord == " ") spacesN++;
-                else nonSpaceWordWidth += words[currentWordID].width;
-            }
-
-            pixelsPerSpace = ((boxWidth / scale) - (x / scale) - nonSpaceWordWidth) / spacesN;
-
-            for(int w=0;w < lines[l].wordsID.size(); w++){
-                currentWordID = lines[l].wordsID[w];
-
-                drawX = currX;
-                drawY = defaultFont.getLineHeight() * (l + 1);
-
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b);
-                ofPushMatrix();
-                //Move to top left point using pre-scaled co-ordinates
-                ofTranslate(x, y, 0.0f);
-                ofScale(scale, scale, scale);
-
-                if (words[currentWordID].rawWord != " ") {
-                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+void ofxTextBlock::draw(){
+    float yAlig = y;
+    
+    if (vAlignment == OF_TEXT_ALIGN_BOTTOM){
+        yAlig = y + height - getTextHeight();
+    } else if (vAlignment == OF_TEXT_ALIGN_MIDDLE){
+        yAlig = getCenter().y - getTextHeight()*0.5;
+        cout << "seting middle" << endl;
+    }
+    
+    if (hAlignment == OF_TEXT_ALIGN_LEFT){
+        string  strToDraw;
+        int     currentWordID;
+        float   drawX;
+        float   drawY;
+        
+        float currX = 0;
+        
+        if (words.size() > 0){
+            for(int l=0;l < lines.size(); l++){
+                for(int w=0;w < lines[l].wordsID.size(); w++){
+                    
+                    currentWordID = lines[l].wordsID[w];
+                    
+                    drawX = x + currX;
+                    drawY = yAlig + (font.getLineHeight() * (l + 1));
+                    
+                    ofPushMatrix();
+                    ofScale(scale, scale, scale);
+                    font.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                     currX += words[currentWordID].width;
-                } else {
-                    currX += pixelsPerSpace;
+                    ofPopMatrix();
+                    
                 }
-                ofPopMatrix();
-
+                currX = 0;
             }
-            currX = 0;
-
+        }
+    } else if (hAlignment == OF_TEXT_ALIGN_RIGHT){
+        string  strToDraw;
+        int     currentWordID;
+        float   drawX;
+        float   drawY;
+        
+        float currX = 0;
+        
+        if (words.size() > 0) {
+            
+            for(int l=0;l < lines.size(); l++){
+                for(int w=lines[l].wordsID.size() - 1; w >= 0; w--){
+                    
+                    currentWordID = lines[l].wordsID[w];
+                    
+                    drawX = -currX - words[currentWordID].width;
+                    drawY = font.getLineHeight() * (l + 1);
+                    
+                    ofPushMatrix();
+                    
+                    //Move to top left point using pre-scaled co-ordinates
+                    ofTranslate(x + width, yAlig, 0.0f);
+                    ofScale(scale, scale, scale);
+                    
+                    font.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                    currX += words[currentWordID].width;
+                    
+                    ofPopMatrix();
+                    
+                }
+                currX = 0;
+                
+            }
+        }
+    } else if (hAlignment == OF_TEXT_ALIGN_JUSTIFIED){
+        string  strToDraw;
+        int     currentWordID;
+        float   drawX;
+        float   drawY;
+        int     spacesN;
+        float   nonSpaceWordWidth;
+        float   pixelsPerSpace;
+        
+        float currX = 0;
+        
+        if (words.size() > 0) {
+            for(int l=0;l < lines.size(); l++){
+                //Find number of spaces and width of other words;
+                spacesN = 0;
+                nonSpaceWordWidth = 0;
+                
+                for(int w = 0; w < lines[l].wordsID.size(); w++){
+                    currentWordID = lines[l].wordsID[w];
+                    if (words[currentWordID].rawWord == " ") spacesN++;
+                    else nonSpaceWordWidth += words[currentWordID].width;
+                }
+                
+                pixelsPerSpace = ((width / scale) - (x / scale) - nonSpaceWordWidth) / spacesN;
+                
+                for(int w=0;w < lines[l].wordsID.size(); w++){
+                    currentWordID = lines[l].wordsID[w];
+                    
+                    drawX = currX;
+                    drawY = font.getLineHeight() * (l + 1);
+                    
+                    ofPushMatrix();
+                    //Move to top left point using pre-scaled co-ordinates
+                    ofTranslate(x, yAlig, 0.0f);
+                    ofScale(scale, scale, scale);
+                    
+                    if (words[currentWordID].rawWord != " ") {
+                        font.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                        currX += words[currentWordID].width;
+                    } else {
+                        currX += pixelsPerSpace;
+                    }
+                    ofPopMatrix();
+                    
+                }
+                currX = 0;
+                
+            }
+        }
+    } else if (hAlignment == OF_TEXT_ALIGN_CENTER ){
+        string  strToDraw;
+        int     currentWordID;
+        float   drawX;
+        float   drawY;
+        float   lineWidth;
+        
+        float currX = 0;
+        
+        if (words.size() > 0) {
+            for(int l=0;l < lines.size(); l++){
+                
+                //Get the length of the line.
+                lineWidth = 0;
+                for(int w=0;w < lines[l].wordsID.size(); w++){
+                    currentWordID = lines[l].wordsID[w];
+                    lineWidth += words[currentWordID].width;
+                }
+                
+                for(int w=0;w < lines[l].wordsID.size(); w++){
+                    currentWordID = lines[l].wordsID[w];
+                    
+                    drawX = -(lineWidth / 2) + currX;
+                    drawY = font.getLineHeight() * (l + 1);
+                    
+                    ofPushMatrix();
+                    //Move to central point using pre-scaled co-ordinates
+                    ofTranslate(getCenter().x, yAlig, 0.0f);
+                    ofScale(scale, scale, scale);
+                    font.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                    currX += words[currentWordID].width;
+                    ofPopMatrix();
+                    
+                }
+                currX = 0;
+            }
         }
     }
 }
 
-void ofxTextBlock::drawRight(float x, float y){
-
-    string  strToDraw;
-    int     currentWordID;
-    float   drawX;
-    float   drawY;
-
-    float currX = 0;
-
-    if (words.size() > 0) {
-
-        for(int l=0;l < lines.size(); l++){
-            for(int w=lines[l].wordsID.size() - 1; w >= 0; w--){
-
-                currentWordID = lines[l].wordsID[w];
-
-                drawX = -currX - words[currentWordID].width;
-                drawY = defaultFont.getLineHeight() * (l + 1);
-
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b);
-
-                ofPushMatrix();
-
-                //Move to top left point using pre-scaled co-ordinates
-                ofTranslate(x, y, 0.0f);
-                ofScale(scale, scale, scale);
-
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
-                currX += words[currentWordID].width;
-
-                ofPopMatrix();
-
-            }
-            currX = 0;
-
-        }
-    }
-}
-
-void ofxTextBlock::_trimLineSpaces()
-{
+void ofxTextBlock::_trimLineSpaces(){
         if (words.size() > 0) {
             //Now delete all leading or ending spaces on each line
             for(int l=0;l < lines.size(); l++){
@@ -242,7 +239,6 @@ int ofxTextBlock::_getLinedWords(){
     int wordCount = 0;
 
     if (words.size() > 0) {
-
         for(int l=0;l < lines.size(); l++){
             wordCount += lines[l].wordsID.size();
         }
@@ -251,7 +247,7 @@ int ofxTextBlock::_getLinedWords(){
     else return 0;
 }
 
-void ofxTextBlock::wrapTextArea(float rWidth, float rHeight){
+void ofxTextBlock::_wrapTextArea(float rWidth, float rHeight){
 
     float tmpScale = 0.0f;
     float maxIterations = _getLinedWords();
@@ -264,10 +260,10 @@ void ofxTextBlock::wrapTextArea(float rWidth, float rHeight){
         for (int iteration=1; iteration <= maxIterations; iteration++){
 
             //printf("Iteration %i...\n", iteration);
-            wrapTextForceLines(iteration);
+            _wrapTextForceLines(iteration);
 
-            tmpScale = rWidth / getWidth();
-            if ((tmpScale * getHeight()) < rHeight) {
+            tmpScale = rWidth / getTextWidth();
+            if ((tmpScale * getTextHeight()) < rHeight) {
                 scales[iteration] = tmpScale;
             }
             else {
@@ -291,13 +287,12 @@ void ofxTextBlock::wrapTextArea(float rWidth, float rHeight){
         //When only one line is needed an appropriate on the Y scale can sometimes not be found.  In these occasions scale the size to the Y dimension
         if (bScaleAvailable) {
             scale = scales[maxIndex];
-        }
-        else {
-            scale = (float)rHeight / (float)getHeight();
+        } else {
+            scale = (float)rHeight / (float)getTextHeight();
         }
 
         float persistScale = scale; //Need to persist the scale as the wrapTextForceLines will overwrite.
-        wrapTextForceLines(maxIndex);
+        _wrapTextForceLines(maxIndex);
         scale = persistScale;
 
         ofLog(OF_LOG_VERBOSE,"Scaling with %i at scale %f...\n", maxIndex, scale);
@@ -307,7 +302,7 @@ void ofxTextBlock::wrapTextArea(float rWidth, float rHeight){
 }
 
 
-bool ofxTextBlock::wrapTextForceLines(int linesN){
+bool ofxTextBlock::_wrapTextForceLines(int linesN){
 
     if (words.size() > 0) {
 
@@ -319,22 +314,18 @@ bool ofxTextBlock::wrapTextForceLines(int linesN){
         bool bGotLines;
 
         //keep increasing the line width until we get the desired number of lines.
-        while (!bGotLines) {
-
-            curLines = wrapTextX(lineWidth);
+        while (!bGotLines){
+            curLines = _wrapTextX(lineWidth);
             if (curLines == linesN) return true;
             if (curLines > linesN) return false;
             lineWidth-=10;
-
         }
-
     }
-
 }
 
 
-int ofxTextBlock::wrapTextX(float lineWidth){
-
+int ofxTextBlock::_wrapTextX(float lineWidth){
+    
     scale = 1.0f;
 
     if (words.size() > 0) {
@@ -348,15 +339,12 @@ int ofxTextBlock::wrapTextX(float lineWidth){
         tmpLine.wordsID.clear();
         int         activeLine = 0;
 
-        for(int i=0;i < words.size(); i++)
-        {
-
+        for(int i=0;i < words.size(); i++){
             runningWidth += words[i].width;
 
             if (runningWidth <= lineWidth) {
                 newLine = false;
-            }
-            else {
+            } else {
 
                 newLine = true;
                 lines.push_back(tmpLine);
@@ -364,7 +352,6 @@ int ofxTextBlock::wrapTextX(float lineWidth){
                 runningWidth = 0.0f + words[i].width;;
                 activeLine++;
             }
-
             tmpLine.wordsID.push_back(i);
         }
 
@@ -391,19 +378,16 @@ void ofxTextBlock::_loadWords(){
 
     words.clear();
 
-    for(int i=0;i < tokens.size(); i++)
-    {
+    for(int i=0;i < tokens.size(); i++){
         tmpWord.rawWord = tokens.at(i);
-        tmpWord.width   = defaultFont.stringWidth(tmpWord.rawWord);
-        tmpWord.height  = defaultFont.stringHeight(tmpWord.rawWord);
-        tmpWord.color.r = tmpWord.color.g = tmpWord.color.b = 150;
+        tmpWord.width   = font.stringWidth(tmpWord.rawWord);
+        tmpWord.height  = font.stringHeight(tmpWord.rawWord);
         words.push_back(tmpWord);
         //add spaces into the words vector if it is not the last word.
         if (i != tokens.size()) words.push_back(blankSpaceWord);
     }
 
-    for(int i=0;i < words.size(); i++)
-    {
+    for(int i=0;i < words.size(); i++){
         ofLog(OF_LOG_VERBOSE, "Loaded word: %i, %s\n", i, words[i].rawWord.c_str());
     }
 
@@ -411,36 +395,28 @@ void ofxTextBlock::_loadWords(){
 }
 
 float ofxTextBlock::_getWidthOfWords(){
-
     float widthTotal = 0.0f;
 
     if (words.size() > 0) {
-        for(int i=0;i < words.size(); i++)
-        {
+        for(int i=0;i < words.size(); i++) {
             widthTotal += words[i].width;
-
         }
         return widthTotal;
-    }
-    else {
+    } else {
         return 0.0f;
     }
 
 }
 
-float ofxTextBlock::getWidth(){
-
+float ofxTextBlock::getTextWidth(){
     int   currentWordID;
 
     float currX = 0.0f;
     float maxWidth  = 0.0f;
 
     if (words.size() > 0) {
-
-        for(int l=0;l < lines.size(); l++)
-        {
-            for(int w=0;w < lines[l].wordsID.size(); w++)
-            {
+        for(int l=0;l < lines.size(); l++){
+            for(int w=0;w < lines[l].wordsID.size(); w++){
                 currentWordID = lines[l].wordsID[w];
                 currX += words[currentWordID].width;
             }
@@ -450,44 +426,11 @@ float ofxTextBlock::getWidth(){
         return maxWidth * scale;
     }
     else return 0;
-
 }
 
-float ofxTextBlock::getHeight(){
-
+float ofxTextBlock::getTextHeight(){
     if (words.size() > 0) {
-        return defaultFont.getLineHeight() * scale * lines.size();
+        return font.getLineHeight() * scale * lines.size();
     }
     else return 0;
-
 }
-
-void ofxTextBlock::setLineHeight(float lineHeight){
-
-    defaultFont.setLineHeight(lineHeight);
-
-}
-
-void ofxTextBlock::setColor(int r, int g, int b, int a){
-
-    ofColor tmpColor;
-    tmpColor.r = r;
-    tmpColor.g = g;
-    tmpColor.b = b;
-    tmpColor.a = a;
-
-    if (words.size() > 0) {
-        for(int i=0;i < words.size(); i++)
-        {
-           words[i].color = tmpColor;
-
-        }
-    }
-
-}
-
-void ofxTextBlock::forceScale(float _scale){
-    scale = _scale;
-}
-
-

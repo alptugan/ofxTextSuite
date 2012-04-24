@@ -1,6 +1,5 @@
 //
-//  AnimatedText.cpp
-//  animatedText
+//  ofxTextSequencer.cpp
 //
 //  Created by Patricio González Vivo on 4/9/12.
 //  Copyright (c) 2012 PatricioGonzalezVivo.com. All rights reserved.
@@ -10,6 +9,11 @@
 
 ofxTextSequencer::ofxTextSequencer(){
     currentLine = 0;
+    countDown   = 1.0;
+    seconds     = 1.0;
+    speed       = 1.0;
+    bPlay       = false;
+    bMessage    = false;
 }
 
 bool ofxTextSequencer::load(string _xmlFile){
@@ -23,12 +27,7 @@ bool ofxTextSequencer::load(string _xmlFile){
         secondsForChar = XML.getValue("secondForChar", 0.2);
         waitingTime = XML.getValue("waitingTime", 2.0);
         
-        textBlock.init( fontFile, 
-                       fontSize);
-        cout << "Font: " << fontFile << endl;
-        cout << "Size: " << fontSize << endl;
-        
-        textBlock.setColor(0, 0, 0, 255);
+        textBlock.init( fontFile, fontSize);
         
         int totalLines = XML.getNumTags("phrase");
         
@@ -40,25 +39,33 @@ bool ofxTextSequencer::load(string _xmlFile){
             newPhrase.seconds = newPhrase.text.length() * secondsForChar;
             newPhrase.speed = XML.getValue("speed", 1.0);
             
-            subsChars(newPhrase.text);
-            string alignment = XML.getValue("align", "LEFT");
+            _subsChars(newPhrase.text);
+            string alignment = XML.getValue("hAlign", "LEFT");
             
             if (alignment == "LEFT"){
-                newPhrase.align = 0;
+                newPhrase.hAlign = OF_TEXT_ALIGN_LEFT;
             } else if ( alignment == "RIGHT"){
-                newPhrase.align = 1;
+                newPhrase.hAlign = OF_TEXT_ALIGN_RIGHT;
             } else if ( alignment == "JUSTIFIED"){
-                newPhrase.align = 2;
+                newPhrase.hAlign = OF_TEXT_ALIGN_JUSTIFIED;
             } else if ( alignment == "CENTER"){
-                newPhrase.align = 3;
+                newPhrase.hAlign = OF_TEXT_ALIGN_CENTER;
             }
+            
+            alignment = XML.getValue("vAlign", "TOP");
+            
+            if (alignment == "TOP"){
+                newPhrase.vAlign = OF_TEXT_ALIGN_TOP;
+            } else if ( alignment == "BOTTOM"){
+                newPhrase.vAlign = OF_TEXT_ALIGN_BOTTOM;
+            } else if ( alignment == "MIDDLE"){
+                newPhrase.vAlign = OF_TEXT_ALIGN_MIDDLE;
+            } 
             
             script.push_back(newPhrase);
             
             XML.popTag();
         }
-        
-        cout << script.size() << " lines loaded" << endl;
         
         countDown = waitingTime;
         currentLine = -1;
@@ -68,29 +75,37 @@ bool ofxTextSequencer::load(string _xmlFile){
     return success;
 }
 
-void  ofxTextSequencer::showMessage(string _message){
+void  ofxTextSequencer::showMessage(string _message, ofxHorizontalAlignment _hAlign, ofxVerticalAlignment _vAlign, float _speed){
+    bMessage = true;
     
-}
-
-float ofxTextSequencer::getNormTransitionValue(){
-    float rta = 0;
-    if ((currentLine > -1) &&
-        (currentLine < script.size()) ){
-            
-        rta = sin( (countDown/script[currentLine].seconds ) * PI );
-    }
+    message.text = _message;
+    message.seconds = message.text.length() * secondsForChar;
+    message.speed = _speed;
+    message.hAlign = _hAlign;
+    message.vAlign = _vAlign;
+    
+    _subsChars(message.text);
+    
+    if (bWaiting){
+        countDown = 0;
+    } else {
+        float halfOfTime = seconds*0.5;
+        if (countDown < halfOfTime){
+            countDown = halfOfTime + ( halfOfTime - countDown ); 
+        }
         
-    return rta;
+        speed = 2.0;
+    }
 }
 
-void ofxTextSequencer::subsChars(string & origString){  
-    static charSubstitution chars[]={ {"à","\xE0"}, {"á","\xE1"}, {"â","\xE2"}, {"ã","\xE3"}, {"ä","\xE4"}, {"æ","\xE6"}, {"ò","\xF2"},{"ó","\xF3"}, {"ô","\xF4"}, {"õ","\xF5"}, {"ö","\xF6"}, {"ù","\xF9"}, {"ú","\xFA"}, {"û","\xFB"}, {"ü","\xFC"}, {"è","\xE8"}, {"é","\xE9"}, {"ê","\xEA"}, {"ë","\xEB"}, {"ì","\xEC"}, {"í","\xED"}, {"î","\xEE"}, {"ï","\xEF"}, {"ç","\xE7"}, {"Ç","\xC7"} };  
+void ofxTextSequencer::setNextPhrase(ofxTextPhrase &_phrase ){
+    countDown   = _phrase.seconds;
+    seconds     = _phrase.seconds;
+    speed       = _phrase.speed;
     
-    for(int i=0; i<24; i++){  
-        while(origString.find(chars[i].character) !=string::npos){  
-            origString = origString.substr(0,origString.find(chars[i].character)) + chars[i].code + origString.substr(origString.find(chars[i].character)+2);  
-        }  
-    };  
+    textBlock.set(x,y,width,height);
+    textBlock.setText( _phrase.text );
+    textBlock.setAlignment(script[currentLine].hAlign, script[currentLine].vAlign);
 }
 
 void ofxTextSequencer::draw(){
@@ -103,34 +118,42 @@ void ofxTextSequencer::draw(){
         
         if ( countDown <= 0){
             
-            //  If the waiting ends go to the next phrase.
+            //  If the waiting ends load the a phrase
             //
             bWaiting = false;
-            currentLine = (currentLine+1)%script.size();
-            textBlock.setText( script[currentLine].text );
-            //textBlock.wrapTextArea(width, height);
-            textBlock.wrapTextX(width);
-            countDown = script[currentLine].seconds;
-            cout << "Loading next Phrase: " << script[currentLine].text << endl;
+            
+            if (!bMessage){
+                
+                //  If there is not any message on the pull
+                //  jump to next phrase of the script
+                //
+                currentLine = (currentLine+1)%script.size();
+                setNextPhrase( script[currentLine] );
+                
+            } else {
+                
+                bMessage = false;
+                setNextPhrase( message );
+            }
         }
     } else {
-        ofSetColor(255, 255, 255);
-        
-        if (script[currentLine].align == 0){
-            textBlock.drawLeft(x, y);
-        } else if (script[currentLine].align == 1){
-            textBlock.drawRight(x + width - textBlock.getWidth(), y);
-        } else if (script[currentLine].align == 2){
-            textBlock.drawJustified(x, y, width);
-        } else if (script[currentLine].align == 3){
-            textBlock.drawCenter(getCenter().x, getCenter().y);
-        }
+        textBlock.draw();
         
         if ( countDown <= 0){
             bWaiting = true;
             countDown = waitingTime;
         }
         
-        countDown -= (1/ofGetFrameRate())*script[currentLine].speed;
+        countDown -= (1/ofGetFrameRate())*speed;
     } 
+}
+
+void ofxTextSequencer::_subsChars(string & origString){  
+    static charSubstitution chars[]={ {"à","\xE0"}, {"á","\xE1"}, {"â","\xE2"}, {"ã","\xE3"}, {"ä","\xE4"}, {"æ","\xE6"}, {"ò","\xF2"},{"ó","\xF3"}, {"ô","\xF4"}, {"õ","\xF5"}, {"ö","\xF6"}, {"ù","\xF9"}, {"ú","\xFA"}, {"û","\xFB"}, {"ü","\xFC"}, {"è","\xE8"}, {"é","\xE9"}, {"ê","\xEA"}, {"ë","\xEB"}, {"ì","\xEC"}, {"í","\xED"}, {"î","\xEE"}, {"ï","\xEF"}, {"ç","\xE7"}, {"Ç","\xC7"} };  
+    
+    for(int i=0; i<24; i++){  
+        while(origString.find(chars[i].character) !=string::npos){  
+            origString = origString.substr(0,origString.find(chars[i].character)) + chars[i].code + origString.substr(origString.find(chars[i].character)+2);  
+        }  
+    };  
 }

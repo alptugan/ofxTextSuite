@@ -17,10 +17,11 @@
 
  ***********************************************************************/
 
-#ifndef OFXTEXTSUITE_H
-#define OFXTEXTSUITE_H
+#ifndef OFXTEXTSUITE
+#define OFXTEXTSUITE
 
+#include "ofxTextArc.h"
 #include "ofxTextBlock.h"
 #include "ofxTextSequencer.h"
 
-#endif // OFXTEXTSUITE_H
+#endif

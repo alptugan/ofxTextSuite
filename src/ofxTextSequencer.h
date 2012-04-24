@@ -1,6 +1,5 @@
 //
-//  AnimatedText.h
-//  animatedText
+//  ofxTextSequencer.h
 //
 //  Created by Patricio González Vivo on 4/9/12.
 //  Copyright (c) 2012 PatricioGonzalezVivo.com. All rights reserved.
@@ -14,10 +13,10 @@
 #include "ofxXmlSettings.h"
 
 typedef struct {
-    string  text;
-    float   speed;
-    float   seconds;
-    int     align;
+    string              text;
+    float               speed, seconds;
+    ofxHorizontalAlignment hAlign;
+    ofxVerticalAlignment   vAlign;
 } ofxTextPhrase;
 
 typedef struct{  
@@ -29,33 +28,32 @@ class ofxTextSequencer: public ofRectangle {
 public:
     ofxTextSequencer();
     
-    bool    load(string _xmlFile);
     void    setSpeed(float _speed){speed = _speed;};
     void    setWaitingTime( float _time){ waitingTime = _time;};
+    void    setNextPhrase(ofxTextPhrase &_phrase );
     
-    void    setColor( ofColor &_color) { textBlock.setColor( _color.r, _color.g, _color.b, _color.a); };
-    void    setColor( int _b, int _a = 255) { textBlock.setColor( _b, _b, _b, _a); };
-    void    setColor( int _r, int _g, int _b, int _a = 255) { textBlock.setColor( _r, _g, _b, _a); };
+    float   getNormTransitionValue(){ return sin( (countDown/seconds) * PI );};
+    bool    load(string _xmlFile);
+    void    play(){ bPlay = true; };
     
-    void    showMessage(string _message);
+    void    stop(){ bPlay = false;};
+    void    showMessage(string _message, ofxHorizontalAlignment _hAlign = OF_TEXT_ALIGN_LEFT, ofxVerticalAlignment _vAlign = OF_TEXT_ALIGN_TOP, float _speed = 1.0 );
     
-    float   getNormTransitionValue();
     void    draw();
     
 private:
-    void    subsChars(string & origString);
-    vector<ofxTextPhrase>  script;
+    void    _subsChars(string & origString);
+    
+    vector<ofxTextPhrase> script;
+    ofxTextPhrase   message;
     
     ofxTextBlock  textBlock;
     
-    float   speed;
-    float   waitingTime;
-    float   secondsForChar;
-    
-    float   countDown;
+    float   waitingTime, secondsForChar;
+    float   speed, seconds, countDown;
     int     currentLine;
     
-    bool    bWaiting;
+    bool    bWaiting, bMessage, bPlay;
 };
 
 #endif

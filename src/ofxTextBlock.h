@@ -27,53 +27,46 @@ typedef struct {
     string  rawWord;
     float   width;
     float   height;
-    ofColor color;
-
 } wordBlock;
-
 
 typedef struct {
     public:
     vector<int>   wordsID;
     float   width;
     float   height;
-}lineBlock;
+} lineBlock;
 
 //Just a helpful set of enumerated constants.
-enum TextBlockAlignment {
+enum ofxHorizontalAlignment {
     OF_TEXT_ALIGN_LEFT, 
     OF_TEXT_ALIGN_RIGHT, 
     OF_TEXT_ALIGN_JUSTIFIED, 
     OF_TEXT_ALIGN_CENTER 
 };
 
-class ofxTextBlock{
+enum ofxVerticalAlignment {
+    OF_TEXT_ALIGN_TOP, 
+    OF_TEXT_ALIGN_BOTTOM, 
+    OF_TEXT_ALIGN_MIDDLE 
+};
+
+class ofxTextBlock: public ofRectangle {
 public:
     ofxTextBlock();
-    virtual ~ofxTextBlock();
 
     void    init(string fontLocation, float fontSize);
 
-    void    setText(string _inputText);
-
-    int     wrapTextX(float lineWidth);                 //Returns the number of lines it formed.
-    void    wrapTextArea(float rWidth, float rHeight);
-    bool    wrapTextForceLines(int linesN);
-
-    void    setLineHeight(float lineHeight);
-    void    setColor(int r, int g, int b, int a);
-
-    void    draw(float x, float y);                    //Draws left align.
-    void    drawLeft(float x, float y);
-    void    drawRight(float x, float y);
-    void    drawCenter(float x, float y);
-    void    drawJustified(float x, float y, float boxWidth);
-
-    void    forceScale(float _scale);
+    void            setText(string _inputText);
+    ofxTextBlock&   setScale(float _scale){ scale = _scale; return * this;};
+    ofxTextBlock&   setLineHeight(float lineHeight){ font.setLineHeight(lineHeight); return * this;};
+    ofxTextBlock&   setAlignment(ofxHorizontalAlignment _hAlignment , ofxVerticalAlignment _vAlignment = OF_TEXT_ALIGN_TOP);
+    ofxTextBlock&   setWrapping(bool _bWraping){ bWraping = _bWraping; return * this; };
     
-    float   getWidth();
-    float   getHeight();
-
+    float   getTextWidth();
+    float   getTextHeight();
+    
+    void    draw();
+    
 protected:
     void    _loadWords();
 
@@ -81,13 +74,23 @@ protected:
     float   _getWidthOfWords();
     int     _getLinedWords();
     
-    string          rawText;
-    ofTrueTypeFont  defaultFont;
-    wordBlock       blankSpaceWord;
-    float           scale;
+    int     _wrapTextX(float lineWidth);                 //Returns the number of lines it formed.
+    void    _wrapTextArea(float rWidth, float rHeight);
+    bool    _wrapTextForceLines(int linesN);
     
-    vector<wordBlock>   words;
-    vector<lineBlock>   lines;
+    void    _forceScale(float _scale);
+    
+    ofTrueTypeFont          font;
+    
+    vector<wordBlock>       words;
+    vector<lineBlock>       lines;
+    wordBlock               blankSpaceWord;
+    
+    ofxHorizontalAlignment  hAlignment;
+    ofxVerticalAlignment    vAlignment;
+    string                  rawText;
+    float                   scale;
+    bool                    bWraping;
 };
 
 #endif // OFXTEXTBLOCK_H
