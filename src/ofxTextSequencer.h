@@ -43,7 +43,7 @@ public:
     
     void    stop(){ bPlay = false;};
     void    showMessage( textPhrase &_phrase );
-    void    showMessage(string _message, horizontalAlignment _hAlign = OF_TEXT_ALIGN_LEFT, verticalAlignment _vAlign = OF_TEXT_ALIGN_TOP, float _speed = 1.0 );
+    void    showMessage(string _message, horizontalAlignment _hAlign = OF_TEXT_ALIGN_LEFT, verticalAlignment _vAlign = OF_TEXT_ALIGN_TOP, float _speed = -1.0);
     
     void    draw();
     
@@ -58,6 +58,7 @@ private:
     textShape   defaultShape;
     string      defaultFontFile;
     float       defaultFontSize, defaultFontDpi, defaultSpeed;
+    int         defaultSpin;
     verticalAlignment   defaultVertAlign;
     horizontalAlignment defaultHoriAlign;
     

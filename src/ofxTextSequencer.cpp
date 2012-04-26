@@ -42,6 +42,8 @@ bool ofxTextSequencer::load(string _xmlFile){
         secForChar          = XML.getValue("default:secForChar", 0.2);
         secBetweenPhrase    = XML.getValue("default:secBetweenPhrase", 2.0);
         
+        defaultSpin         = XML.getValue("default:spin", 0);
+        
         string defShape     = XML.getValue("default:shape", "BLOCK");
         if (defShape == "BLOCK"){
             defaultShape = OF_TEXT_SHAPE_BLOCK;
@@ -88,7 +90,7 @@ bool ofxTextSequencer::load(string _xmlFile){
             newPhrase.fontDpi   =   XML.getValue("font:dpi", defaultFontDpi);
             newPhrase.speed     =   XML.getValue("speed", defaultSpeed);
             newPhrase.scale     =   XML.getValue("scale", 1.0);
-            newPhrase.spin      =   XML.getValue("spin", 0);
+            newPhrase.spin      =   XML.getValue("spin", defaultSpin);
             
             string shape = XML.getValue("shape", defShape);
             if (shape == "BLOCK"){
@@ -140,6 +142,9 @@ bool ofxTextSequencer::load(string _xmlFile){
 void  ofxTextSequencer::showMessage(string _message, horizontalAlignment _hAlign, verticalAlignment _vAlign, float _speed){
     bMessage = true;
     
+    if (_speed == -1.0)
+        _speed = defaultSpeed;
+    
     message.text    =   _message;
     message.seconds =   message.text.length() * secForChar;
     message.speed   =   _speed;
@@ -151,7 +156,7 @@ void  ofxTextSequencer::showMessage(string _message, horizontalAlignment _hAlign
     message.fontFile=   defaultFontFile;
     message.fontSize=   defaultFontSize;
     message.fontDpi =   defaultFontDpi;
-    message.spin    =   0;
+    message.spin    =   defaultSpin;
 }
 
 void ofxTextSequencer::showMessage( textPhrase &_phrase ){
@@ -167,7 +172,7 @@ void ofxTextSequencer::showMessage( textPhrase &_phrase ){
             countDown = halfOfTime + ( halfOfTime - countDown ); 
         }
         
-        speed = 2.0;
+        speed *= 2.0;
     }
 }
 
@@ -250,6 +255,13 @@ void ofxTextSequencer::draw(){
         
         countDown -= (1/ofGetFrameRate())*speed;
     } 
+    
+    /*
+    ofPushView();
+    ofNoFill();
+    ofSetColor(100);
+    ofRect( (ofRectangle) *this );
+    ofPopView();*/
 }
 
 string ofxTextSequencer::spinningString(string _orginalText, int _nChars, int _offset){
