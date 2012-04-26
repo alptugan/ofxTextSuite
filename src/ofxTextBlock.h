@@ -23,49 +23,45 @@
 #include "ofMain.h"
 #include <iterator>
 
+#include "ofxTextFont.h"
+#include "ofxTextAlignment.h"
+
 typedef struct {
-    string  rawWord;
-    float   width;
-    float   height;
+    string      rawWord;
+    float       width;
+    float       height;
 } wordBlock;
 
 typedef struct {
-    public:
-    vector<int>   wordsID;
-    float   width;
-    float   height;
+    vector<int> wordsID;
+    float       width;
+    float       height;
 } lineBlock;
-
-//Just a helpful set of enumerated constants.
-enum ofxHorizontalAlignment {
-    OF_TEXT_ALIGN_LEFT, 
-    OF_TEXT_ALIGN_RIGHT, 
-    OF_TEXT_ALIGN_JUSTIFIED, 
-    OF_TEXT_ALIGN_CENTER 
-};
-
-enum ofxVerticalAlignment {
-    OF_TEXT_ALIGN_TOP, 
-    OF_TEXT_ALIGN_BOTTOM, 
-    OF_TEXT_ALIGN_MIDDLE 
-};
 
 class ofxTextBlock: public ofRectangle {
 public:
     ofxTextBlock();
 
-    void    init(string fontLocation, float fontSize);
+    virtual void    loadFont(string _fontLocation, float _fontSize, int _dpi = 90);
 
-    void            setText(string _inputText);
-    ofxTextBlock&   setScale(float _scale){ scale = _scale; return * this;};
-    ofxTextBlock&   setLineHeight(float lineHeight){ font.setLineHeight(lineHeight); return * this;};
-    ofxTextBlock&   setAlignment(ofxHorizontalAlignment _hAlignment , ofxVerticalAlignment _vAlignment = OF_TEXT_ALIGN_TOP);
-    ofxTextBlock&   setWrapping(bool _bWraping){ bWraping = _bWraping; return * this; };
+    virtual void    setText(string _inputText);
+    virtual void    setScale(float _scale){ scale = _scale; };
+    virtual void    setLineHeight(float lineHeight){ font.setLineHeight(lineHeight);};
+    virtual void    setAlignment(ofxHorizontalAlignment _hAlignment , ofxVerticalAlignment _vAlignment = OF_TEXT_ALIGN_TOP);
+    void    setWrapping(bool _bWraping){ bWraping = _bWraping;};
+    
     
     float   getTextWidth();
     float   getTextHeight();
     
+    int     length(){return rawText.length();};
+    void    clear(){ rawText.clear();};
+    ofxTextBlock& operator += (string _text){ setText(rawText + _text);}; 
+    ofxTextBlock& operator = (string _text){ setText(_text);}; 
+    ofxTextBlock& operator -- (int){ if( rawText.length()>0){ rawText.erase(rawText.end()-1); setText(rawText); } };
+    
     void    draw();
+    void    draw(float _x, float _y, float _w = -1, float _h = -1);
     
 protected:
     void    _loadWords();
@@ -80,7 +76,7 @@ protected:
     
     void    _forceScale(float _scale);
     
-    ofTrueTypeFont          font;
+    ofxTextFont             font;
     
     vector<wordBlock>       words;
     vector<lineBlock>       lines;

@@ -20,8 +20,13 @@
 #ifndef OFXTEXTSUITE
 #define OFXTEXTSUITE
 
+#include "ofxTextFont.h"
+#include "ofxTextAlignment.h"
+
 #include "ofxTextArc.h"
+#include "ofxTextSpiral.h"
 #include "ofxTextBlock.h"
+
 #include "ofxTextSequencer.h"
 
 #endif

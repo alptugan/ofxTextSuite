@@ -27,7 +27,7 @@ bool ofxTextSequencer::load(string _xmlFile){
         secondsForChar = XML.getValue("secondForChar", 0.2);
         waitingTime = XML.getValue("waitingTime", 2.0);
         
-        textBlock.init( fontFile, fontSize);
+        textBlock.loadFont( fontFile, fontSize);
         
         int totalLines = XML.getNumTags("phrase");
         
@@ -39,7 +39,7 @@ bool ofxTextSequencer::load(string _xmlFile){
             newPhrase.seconds = newPhrase.text.length() * secondsForChar;
             newPhrase.speed = XML.getValue("speed", 1.0);
             
-            _subsChars(newPhrase.text);
+            subsChars(newPhrase.text);
             string alignment = XML.getValue("hAlign", "LEFT");
             
             if (alignment == "LEFT"){
@@ -84,7 +84,7 @@ void  ofxTextSequencer::showMessage(string _message, ofxHorizontalAlignment _hAl
     message.hAlign = _hAlign;
     message.vAlign = _vAlign;
     
-    _subsChars(message.text);
+    subsChars(message.text);
     
     if (bWaiting){
         countDown = 0;
@@ -146,14 +146,4 @@ void ofxTextSequencer::draw(){
         
         countDown -= (1/ofGetFrameRate())*speed;
     } 
-}
-
-void ofxTextSequencer::_subsChars(string & origString){  
-    static charSubstitution chars[]={ {"à","\xE0"}, {"á","\xE1"}, {"â","\xE2"}, {"ã","\xE3"}, {"ä","\xE4"}, {"æ","\xE6"}, {"ò","\xF2"},{"ó","\xF3"}, {"ô","\xF4"}, {"õ","\xF5"}, {"ö","\xF6"}, {"ù","\xF9"}, {"ú","\xFA"}, {"û","\xFB"}, {"ü","\xFC"}, {"è","\xE8"}, {"é","\xE9"}, {"ê","\xEA"}, {"ë","\xEB"}, {"ì","\xEC"}, {"í","\xED"}, {"î","\xEE"}, {"ï","\xEF"}, {"ç","\xE7"}, {"Ç","\xC7"} };  
-    
-    for(int i=0; i<24; i++){  
-        while(origString.find(chars[i].character) !=string::npos){  
-            origString = origString.substr(0,origString.find(chars[i].character)) + chars[i].code + origString.substr(origString.find(chars[i].character)+2);  
-        }  
-    };  
 }

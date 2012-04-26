@@ -20,6 +20,11 @@
 #include "ofxTextBlock.h"
 
 ofxTextBlock::ofxTextBlock(){
+    x = 0;
+    y = 0;
+    width = ofGetWidth();
+    height = ofGetHeight();
+    
     scale       =   1.0f;
     bWraping    =   false;
     
@@ -27,33 +32,58 @@ ofxTextBlock::ofxTextBlock(){
     vAlignment  =   OF_TEXT_ALIGN_TOP;  
 }
 
-void ofxTextBlock::init(string fontLocation, float fontSize){
-    font.loadFont(fontLocation, fontSize, true, true);
-    font.setGlobalDpi(90);
+void ofxTextBlock::loadFont(string _fontLocation, float _fontSize, int _dpi){
+    font.loadFont(_fontLocation, _fontSize, true, true);
+    font.setGlobalDpi(_dpi);
     
     //Set up the blank space word
+    //
     blankSpaceWord.rawWord = " ";
     blankSpaceWord.width   = font.stringWidth ("x");
     blankSpaceWord.height  = font.stringHeight("i");
 }
 
 void ofxTextBlock::setText(string _inputText){
-    rawText     = _inputText;
-    _loadWords();
-    _wrapTextForceLines(1);
     
-    if ( !bWraping ) {
-        _wrapTextX(width);
-    } else {
+    rawText     = _inputText;
+    
+    //  Replace acent and other special characters for it ascii code
+    //
+    subsChars(rawText);
+    
+    //  Process words extractint width in order to arrange the lines in the specify format
+    //
+    _loadWords();
+    //_wrapTextForceLines(1);
+    
+    //  If wrapping it´s on it try to force the sacale in order to fill all the space area
+    //
+    if ( bWraping )
         _wrapTextArea(width, height);
-    }
+    else
+        _wrapTextX(width);
 }
 
-ofxTextBlock& ofxTextBlock::setAlignment(ofxHorizontalAlignment _hAlignment, ofxVerticalAlignment _vAlignment){
+void ofxTextBlock::setAlignment(ofxHorizontalAlignment _hAlignment, ofxVerticalAlignment _vAlignment){
     hAlignment = _hAlignment;
     vAlignment = _vAlignment;
+}
+
+//  If the user specify a position and shape it will change the x, y, width and height of the based ofRectangle 
+//  variables.
+//
+void ofxTextBlock::draw(float _x, float _y, float _w, float _h){
+    if (_h == -1){
+        _h = height;
+
+        if (_w == -1)
+            _w = width;
+    }
     
-    return * this;
+    set(_x,_y,_w,_h);
+    setText(rawText);
+    
+    draw();
 }
 
 void ofxTextBlock::draw(){
@@ -63,7 +93,6 @@ void ofxTextBlock::draw(){
         yAlig = y + height - getTextHeight();
     } else if (vAlignment == OF_TEXT_ALIGN_MIDDLE){
         yAlig = getCenter().y - getTextHeight()*0.5;
-        cout << "seting middle" << endl;
     }
     
     if (hAlignment == OF_TEXT_ALIGN_LEFT){
@@ -218,20 +247,56 @@ void ofxTextBlock::draw(){
 
 void ofxTextBlock::_trimLineSpaces(){
         if (words.size() > 0) {
-            //Now delete all leading or ending spaces on each line
+            
+            //  Now delete all leading or ending spaces on each line
+            //
             for(int l=0;l < lines.size(); l++){
-                //Delete the first word if it is a blank
+                
+                // Delete the first word if it is a blank
+                //    
                 if (lines[l].wordsID.size() > 0){
                     if (words[lines[l].wordsID[0]].rawWord == " ")   lines[l].wordsID.erase(lines[l].wordsID.begin());
                 }
 
-                //Delete the last word if it is a blank
+                // Delete the last word if it is a blank
+                //
                 if (lines[l].wordsID.size() > 0){
                     if (words[lines[l].wordsID[lines[l].wordsID.size() - 1]].rawWord == " ") lines[l].wordsID.erase(lines[l].wordsID.end() - 1);
                 }
             }
         }
 
+}
+
+
+void ofxTextBlock::_loadWords(){
+    
+    istringstream iss(rawText);
+    
+    vector<string> tokens;
+    copy(istream_iterator<string>(iss),
+         istream_iterator<string>(),
+         back_inserter<vector<string> >(tokens));
+    
+    words.clear();
+    wordBlock tmpWord;
+    for(int i = 0; i < tokens.size(); i++){
+        tmpWord.rawWord = tokens.at(i);
+        tmpWord.width   = font.stringWidth(tmpWord.rawWord);
+        tmpWord.height  = font.stringHeight(tmpWord.rawWord);
+        words.push_back(tmpWord);
+        
+        //  add spaces into the words vector if it is not the last word.
+        //
+        if (i != tokens.size()) 
+            words.push_back(blankSpaceWord);
+    }
+    
+    for(int i=0;i < words.size(); i++){
+        ofLog(OF_LOG_VERBOSE, "Loaded word: %i, %s\n", i, words[i].rawWord.c_str());
+    }
+    
+    
 }
 
 int ofxTextBlock::_getLinedWords(){
@@ -247,31 +312,56 @@ int ofxTextBlock::_getLinedWords(){
     else return 0;
 }
 
+bool ofxTextBlock::_wrapTextForceLines(int linesN){
+    
+    if (words.size() > 0) {
+        
+        if (linesN > words.size()) linesN = words.size();
+        
+        float lineWidth = _getWidthOfWords() * (1.1f / (float)linesN);
+        
+        int curLines = 0;
+        bool bGotLines;
+        
+        //  keep increasing the line width until we get the desired number of lines.
+        //
+        while (!bGotLines){
+            curLines = _wrapTextX(lineWidth);
+            if (curLines == linesN) return true;
+            if (curLines > linesN) return false;
+            lineWidth-=10;
+        }
+    }
+}
+
 void ofxTextBlock::_wrapTextArea(float rWidth, float rHeight){
 
     float tmpScale = 0.0f;
     float maxIterations = _getLinedWords();
     float scales[1000];
-    scale = 1.0f;  //Reset the scale for the height and width calculations.
+    
+    //  Reset the scale for the height and width calculations.
+    //
+    scale = 1.0f;  
 
     if (words.size() > 0) {
 
-        //Check each possible line layout and check it will fit vertically
+        //  Check each possible line layout and check it will fit vertically
+        //
         for (int iteration=1; iteration <= maxIterations; iteration++){
-
-            //printf("Iteration %i...\n", iteration);
+            
             _wrapTextForceLines(iteration);
-
             tmpScale = rWidth / getTextWidth();
+            
             if ((tmpScale * getTextHeight()) < rHeight) {
                 scales[iteration] = tmpScale;
-            }
-            else {
+            } else {
                 scales[iteration] = -1;
             }
         }
 
-        //Now see which is biggest
+        //  Now see which is biggest
+        //
         int maxIndex = 1;
         bool bScaleAvailable = false;
 
@@ -284,7 +374,9 @@ void ofxTextBlock::_wrapTextArea(float rWidth, float rHeight){
             }
         }
 
-        //When only one line is needed an appropriate on the Y scale can sometimes not be found.  In these occasions scale the size to the Y dimension
+        //  When only one line is needed an appropriate on the Y scale can sometimes not be found. 
+        //  In these occasions scale the size to the Y dimension
+        //
         if (bScaleAvailable) {
             scale = scales[maxIndex];
         } else {
@@ -301,57 +393,40 @@ void ofxTextBlock::_wrapTextArea(float rWidth, float rHeight){
 
 }
 
-
-bool ofxTextBlock::_wrapTextForceLines(int linesN){
-
-    if (words.size() > 0) {
-
-        if (linesN > words.size()) linesN = words.size();
-
-        float lineWidth = _getWidthOfWords() * (1.1f / (float)linesN);
-
-        int curLines = 0;
-        bool bGotLines;
-
-        //keep increasing the line width until we get the desired number of lines.
-        while (!bGotLines){
-            curLines = _wrapTextX(lineWidth);
-            if (curLines == linesN) return true;
-            if (curLines > linesN) return false;
-            lineWidth-=10;
-        }
-    }
-}
-
-
 int ofxTextBlock::_wrapTextX(float lineWidth){
-    
+
+    //  Reset the scale for the height and width calculations.
+    //
     scale = 1.0f;
 
     if (words.size() > 0) {
-
-        float   runningWidth = 0.0f;
-
+        
         lines.clear();
-
+        float       runningWidth = 0.0f;
         bool        newLine = true;
         lineBlock   tmpLine;
         tmpLine.wordsID.clear();
         int         activeLine = 0;
 
-        for(int i=0;i < words.size(); i++){
+        for(int i = 0; i < words.size(); i++){
+            
+            //  Add words to each line until it fills the total amount of width
+            //  available
+            //
             runningWidth += words[i].width;
 
-            if (runningWidth <= lineWidth) {
+            if ((runningWidth <= lineWidth) && ( words[i].rawWord.find("\n") )){
                 newLine = false;
             } else {
-
                 newLine = true;
                 lines.push_back(tmpLine);
                 tmpLine.wordsID.clear();
                 runningWidth = 0.0f + words[i].width;;
                 activeLine++;
             }
+            
+            //  Store in the line the id of the words
+            //
             tmpLine.wordsID.push_back(i);
         }
 
@@ -362,35 +437,6 @@ int ofxTextBlock::_wrapTextX(float lineWidth){
     }
 
     return lines.size();
-
-}
-
-void ofxTextBlock::_loadWords(){
-
-    wordBlock tmpWord;
-
-    istringstream iss(rawText);
-
-    vector<string> tokens;
-    copy(istream_iterator<string>(iss),
-             istream_iterator<string>(),
-             back_inserter<vector<string> >(tokens));
-
-    words.clear();
-
-    for(int i=0;i < tokens.size(); i++){
-        tmpWord.rawWord = tokens.at(i);
-        tmpWord.width   = font.stringWidth(tmpWord.rawWord);
-        tmpWord.height  = font.stringHeight(tmpWord.rawWord);
-        words.push_back(tmpWord);
-        //add spaces into the words vector if it is not the last word.
-        if (i != tokens.size()) words.push_back(blankSpaceWord);
-    }
-
-    for(int i=0;i < words.size(); i++){
-        ofLog(OF_LOG_VERBOSE, "Loaded word: %i, %s\n", i, words[i].rawWord.c_str());
-    }
-
 
 }
 

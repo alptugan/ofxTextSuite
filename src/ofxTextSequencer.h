@@ -19,11 +19,6 @@ typedef struct {
     ofxVerticalAlignment   vAlign;
 } ofxTextPhrase;
 
-typedef struct{  
-    string character;  
-    string code;  
-} charSubstitution;
-
 class ofxTextSequencer: public ofRectangle {
 public:
     ofxTextSequencer();
@@ -42,8 +37,6 @@ public:
     void    draw();
     
 private:
-    void    _subsChars(string & origString);
-    
     vector<ofxTextPhrase> script;
     ofxTextPhrase   message;
     
