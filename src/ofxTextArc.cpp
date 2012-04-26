@@ -13,6 +13,9 @@ ofxTextArc::ofxTextArc(){
     
     angle   = 0;
     scale   = 1.0;
+    
+    x = ofGetWidth()*0.5;
+    y = ofGetHeight()*0.5;
     radius  = 300;
     
     hAlignment  =   OF_TEXT_ALIGN_CENTER;
@@ -27,16 +30,12 @@ void ofxTextArc::loadFont(string _fontLocation, float _fontSize, int _dpi ){
 
 void ofxTextArc::setText(string _inputText){
     rawText     = _inputText;
-    subsChars(rawText);
+    _subsChars(rawText);
     _loadWords();
 }
 
-void ofxTextArc::setAlignment(ofxHorizontalAlignment _hAlignment , ofxVerticalAlignment _vAlignment){
-    hAlignment = _hAlignment;
-    vAlignment = _vAlignment;
-}
-
 void ofxTextArc::draw(float _x, float _y){
+    
     ofPushMatrix();
     ofTranslate(_x,_y);
     
@@ -63,6 +62,7 @@ void ofxTextArc::draw(float _x, float _y){
     ofPopMatrix();
     ofPopStyle();
     */
+    
     for (int i = 0; i < rawText.length(); i++) {
         ofPushMatrix();
         ofTranslate( 0, letters[i].radius);
@@ -85,7 +85,7 @@ void ofxTextArc::_loadWords(){
     
     for (int i = 0; i < rawText.length(); i++) {
         
-        letters[i].scale  = 1.0;
+        letters[i].scale  = scale;
         letters[i].radius = radius;
         letters[i].width = font.getCharacterWidth(rawText.at(i)) * font.getLetterSpacing();
         letters[i].angle = atan(letters[i].width / letters[i].radius);

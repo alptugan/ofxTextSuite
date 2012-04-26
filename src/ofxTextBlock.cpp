@@ -49,7 +49,7 @@ void ofxTextBlock::setText(string _inputText){
     
     //  Replace acent and other special characters for it ascii code
     //
-    subsChars(rawText);
+    _subsChars(rawText);
     
     //  Process words extractint width in order to arrange the lines in the specify format
     //
@@ -62,11 +62,6 @@ void ofxTextBlock::setText(string _inputText){
         _wrapTextArea(width, height);
     else
         _wrapTextX(width);
-}
-
-void ofxTextBlock::setAlignment(ofxHorizontalAlignment _hAlignment, ofxVerticalAlignment _vAlignment){
-    hAlignment = _hAlignment;
-    vAlignment = _vAlignment;
 }
 
 //  If the user specify a position and shape it will change the x, y, width and height of the based ofRectangle 
@@ -415,7 +410,7 @@ int ofxTextBlock::_wrapTextX(float lineWidth){
             //
             runningWidth += words[i].width;
 
-            if ((runningWidth <= lineWidth) && ( words[i].rawWord.find("\n") )){
+            if ((runningWidth <= lineWidth)){
                 newLine = false;
             } else {
                 newLine = true;

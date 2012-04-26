@@ -23,8 +23,7 @@
 #include "ofMain.h"
 #include <iterator>
 
-#include "ofxTextFont.h"
-#include "ofxTextAlignment.h"
+#include "ofxTextShape.h"
 
 typedef struct {
     string      rawWord;
@@ -38,27 +37,17 @@ typedef struct {
     float       height;
 } lineBlock;
 
-class ofxTextBlock: public ofRectangle {
+class ofxTextBlock : public ofxTextShape {
 public:
     ofxTextBlock();
 
-    virtual void    loadFont(string _fontLocation, float _fontSize, int _dpi = 90);
+    void    loadFont(string _fontLocation, float _fontSize, int _dpi = 90);
 
-    virtual void    setText(string _inputText);
-    virtual void    setScale(float _scale){ scale = _scale; };
-    virtual void    setLineHeight(float lineHeight){ font.setLineHeight(lineHeight);};
-    virtual void    setAlignment(ofxHorizontalAlignment _hAlignment , ofxVerticalAlignment _vAlignment = OF_TEXT_ALIGN_TOP);
+    void    setText(string _inputText);
     void    setWrapping(bool _bWraping){ bWraping = _bWraping;};
-    
     
     float   getTextWidth();
     float   getTextHeight();
-    
-    int     length(){return rawText.length();};
-    void    clear(){ rawText.clear();};
-    ofxTextBlock& operator += (string _text){ setText(rawText + _text);}; 
-    ofxTextBlock& operator = (string _text){ setText(_text);}; 
-    ofxTextBlock& operator -- (int){ if( rawText.length()>0){ rawText.erase(rawText.end()-1); setText(rawText); } };
     
     void    draw();
     void    draw(float _x, float _y, float _w = -1, float _h = -1);
@@ -76,16 +65,10 @@ protected:
     
     void    _forceScale(float _scale);
     
-    ofxTextFont             font;
-    
     vector<wordBlock>       words;
     vector<lineBlock>       lines;
     wordBlock               blankSpaceWord;
     
-    ofxHorizontalAlignment  hAlignment;
-    ofxVerticalAlignment    vAlignment;
-    string                  rawText;
-    float                   scale;
     bool                    bWraping;
 };
 

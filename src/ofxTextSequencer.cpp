@@ -12,8 +12,16 @@ ofxTextSequencer::ofxTextSequencer(){
     countDown   = 1.0;
     seconds     = 1.0;
     speed       = 1.0;
+    
+    defaultFontFile     =   "helvetica.ttf";
+    defaultFontSize     =   30.0;
+    defaultFontDpi      =   90;
+    defaultShape        =   OF_TEXT_SHAPE_BLOCK;
+    
     bPlay       = false;
     bMessage    = false;
+    
+    text        = NULL;
 }
 
 bool ofxTextSequencer::load(string _xmlFile){
@@ -21,27 +29,77 @@ bool ofxTextSequencer::load(string _xmlFile){
     
     ofxXmlSettings XML;
     
+    
     if (XML.loadFile(_xmlFile)){
-        string fontFile = XML.getValue("font", "helvetica.ttf");
-        float fontSize = XML.getValue("fontSize", 30.0);
-        secondsForChar = XML.getValue("secondForChar", 0.2);
-        waitingTime = XML.getValue("waitingTime", 2.0);
         
-        textBlock.loadFont( fontFile, fontSize);
+        //  Font
+        //
+        defaultFontFile     = XML.getValue("default:font:file", "helvetica.ttf");
+        defaultFontSize     = XML.getValue("default:font:size", 30.0);
+        defaultFontDpi      = XML.getValue("default:font:dpi", 90);
+        
+        defaultSpeed        = XML.getValue("default:speed", 1.0); 
+        secForChar          = XML.getValue("default:secForChar", 0.2);
+        secBetweenPhrase    = XML.getValue("default:secBetweenPhrase", 2.0);
+        
+        string defShape     = XML.getValue("default:shape", "BLOCK");
+        if (defShape == "BLOCK"){
+            defaultShape = OF_TEXT_SHAPE_BLOCK;
+        } else if (defShape == "ARC"){
+            defaultShape = OF_TEXT_SHAPE_ARC;
+        } else if (defShape == "SPIRAL"){
+            defaultShape = OF_TEXT_SHAPE_SPIRAL;
+        }
+        
+        string defVerAlign = XML.getValue("default:hAlign", "CENTER");
+        if (defVerAlign == "TOP"){
+            defaultVertAlign = OF_TEXT_ALIGN_TOP;
+        } else if ( defVerAlign == "BOTTOM"){
+            defaultVertAlign = OF_TEXT_ALIGN_BOTTOM;
+        } else if ( defVerAlign == "MIDDLE"){
+            defaultVertAlign = OF_TEXT_ALIGN_MIDDLE;
+        }
+        
+        string defHorAlign = XML.getValue("default:vAlign", "TOP");
+        if (defHorAlign == "LEFT"){
+            defaultHoriAlign = OF_TEXT_ALIGN_LEFT;
+        } else if ( defHorAlign == "RIGHT"){
+            defaultHoriAlign = OF_TEXT_ALIGN_RIGHT;
+        } else if ( defHorAlign == "JUSTIFIED"){
+            defaultHoriAlign = OF_TEXT_ALIGN_JUSTIFIED;
+        } else if ( defHorAlign == "CENTER"){
+            defaultHoriAlign = OF_TEXT_ALIGN_CENTER;
+        }
         
         int totalLines = XML.getNumTags("phrase");
-        
         for(int i = 0; i < totalLines; i++){
             XML.pushTag("phrase",i);
-            ofxTextPhrase newPhrase;
+            textPhrase newPhrase;
             
-            newPhrase.text = XML.getValue("text", "Text");
-            newPhrase.seconds = newPhrase.text.length() * secondsForChar;
-            newPhrase.speed = XML.getValue("speed", 1.0);
+            //  Text Phrase
+            //
+            newPhrase.text      =   XML.getValue("text", "NO TEXT FOUND");
+            newPhrase.seconds   =   newPhrase.text.length() * secForChar;
             
-            subsChars(newPhrase.text);
-            string alignment = XML.getValue("hAlign", "LEFT");
+            //  Atributes
+            //
+            newPhrase.fontFile  =   XML.getValue("font:file", defaultFontFile);
+            newPhrase.fontSize  =   XML.getValue("font:size", defaultFontSize);
+            newPhrase.fontDpi   =   XML.getValue("font:dpi", defaultFontDpi);
+            newPhrase.speed     =   XML.getValue("speed", defaultSpeed);
+            newPhrase.scale     =   XML.getValue("scale", 1.0);
+            newPhrase.spin      =   XML.getValue("spin", 0);
             
+            string shape = XML.getValue("shape", defShape);
+            if (shape == "BLOCK"){
+                newPhrase.shape = OF_TEXT_SHAPE_BLOCK;
+            } else if (shape == "ARC"){
+                newPhrase.shape = OF_TEXT_SHAPE_ARC;
+            } else if (shape == "SPIRAL"){
+                newPhrase.shape = OF_TEXT_SHAPE_SPIRAL;
+            }
+            
+            string alignment = XML.getValue("hAlign", defVerAlign);
             if (alignment == "LEFT"){
                 newPhrase.hAlign = OF_TEXT_ALIGN_LEFT;
             } else if ( alignment == "RIGHT"){
@@ -52,8 +110,7 @@ bool ofxTextSequencer::load(string _xmlFile){
                 newPhrase.hAlign = OF_TEXT_ALIGN_CENTER;
             }
             
-            alignment = XML.getValue("vAlign", "TOP");
-            
+            alignment = XML.getValue("vAlign", defHorAlign);
             if (alignment == "TOP"){
                 newPhrase.vAlign = OF_TEXT_ALIGN_TOP;
             } else if ( alignment == "BOTTOM"){
@@ -67,24 +124,40 @@ bool ofxTextSequencer::load(string _xmlFile){
             XML.popTag();
         }
         
-        countDown = waitingTime;
+        if (totalLines > 0)
+            bMessage = false;
+        
+        countDown = secBetweenPhrase;
         currentLine = -1;
         bWaiting = true;
+    } else {
+        ofLog(OF_LOG_ERROR, "File " + ofToDataPath(_xmlFile) + " could not be opened" );
     }
 
     return success;
 }
 
-void  ofxTextSequencer::showMessage(string _message, ofxHorizontalAlignment _hAlign, ofxVerticalAlignment _vAlign, float _speed){
+void  ofxTextSequencer::showMessage(string _message, horizontalAlignment _hAlign, verticalAlignment _vAlign, float _speed){
     bMessage = true;
     
-    message.text = _message;
-    message.seconds = message.text.length() * secondsForChar;
-    message.speed = _speed;
-    message.hAlign = _hAlign;
-    message.vAlign = _vAlign;
+    message.text    =   _message;
+    message.seconds =   message.text.length() * secForChar;
+    message.speed   =   _speed;
     
-    subsChars(message.text);
+    message.hAlign  =   _hAlign;
+    message.vAlign  =   _vAlign;
+    message.scale   =   1.0;
+    message.shape   =   defaultShape;
+    message.fontFile=   defaultFontFile;
+    message.fontSize=   defaultFontSize;
+    message.fontDpi =   defaultFontDpi;
+    message.spin    =   0;
+}
+
+void ofxTextSequencer::showMessage( textPhrase &_phrase ){
+    bMessage = true;
+    
+    message = _phrase;
     
     if (bWaiting){
         countDown = 0;
@@ -98,14 +171,33 @@ void  ofxTextSequencer::showMessage(string _message, ofxHorizontalAlignment _hAl
     }
 }
 
-void ofxTextSequencer::setNextPhrase(ofxTextPhrase &_phrase ){
+void ofxTextSequencer::setNextPhrase(textPhrase &_phrase ){
     countDown   = _phrase.seconds;
     seconds     = _phrase.seconds;
     speed       = _phrase.speed;
+
+    delete  text;
+    text = NULL;
     
-    textBlock.set(x,y,width,height);
-    textBlock.setText( _phrase.text );
-    textBlock.setAlignment(script[currentLine].hAlign, script[currentLine].vAlign);
+    switch (_phrase.shape) {
+        case OF_TEXT_SHAPE_BLOCK:
+            text = new ofxTextBlock();
+            break;
+        case OF_TEXT_SHAPE_ARC:
+            text = new ofxTextArc();
+            break;
+        case OF_TEXT_SHAPE_SPIRAL:
+            text = new ofxTextSpiral();
+            break;
+    }
+    
+    if (text != NULL){
+        text->loadFont( _phrase.fontFile, _phrase.fontSize, _phrase.fontDpi );
+        text->set(x,y,width,height);
+        text->setScale( _phrase.scale );
+        text->setText( _phrase.text );
+        text->setAlignment(_phrase.hAlign, _phrase.vAlign);
+    }
 }
 
 void ofxTextSequencer::draw(){
@@ -123,27 +215,32 @@ void ofxTextSequencer::draw(){
             bWaiting = false;
             
             if (!bMessage){
-                
                 //  If there is not any message on the pull
                 //  jump to next phrase of the script
                 //
                 currentLine = (currentLine+1)%script.size();
                 setNextPhrase( script[currentLine] );
-                
             } else {
-                
                 bMessage = false;
                 setNextPhrase( message );
             }
         }
     } else {
-        textBlock.draw();
+        
+        if (text != NULL)
+            text->draw();
+        else
+            ofLog(OF_LOG_ERROR,"Text trying to be render with out loading it");
         
         if ( countDown <= 0){
             bWaiting = true;
-            countDown = waitingTime;
+            countDown = secBetweenPhrase;
         }
         
         countDown -= (1/ofGetFrameRate())*speed;
     } 
+}
+
+string ofxTextSequencer::spin(string _orginalText, int _nChars, int _offset){
+    
 }

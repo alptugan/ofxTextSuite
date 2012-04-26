@@ -9,40 +9,58 @@
 #define ANIMATEDTEXT
 
 #include "ofMain.h"
+
+#include "ofxTextShape.h"
+
+#include "ofxTextArc.h"
 #include "ofxTextBlock.h"
+#include "ofxTextSpiral.h"
+
 #include "ofxXmlSettings.h"
 
 typedef struct {
-    string              text;
-    float               speed, seconds;
-    ofxHorizontalAlignment hAlign;
-    ofxVerticalAlignment   vAlign;
-} ofxTextPhrase;
+    string                  text, fontFile;
+    float                   seconds, speed, scale, fontSize, fontDpi;
+    int                     spin;
+    textShape               shape;
+    horizontalAlignment     hAlign;
+    verticalAlignment       vAlign;
+} textPhrase;
 
 class ofxTextSequencer: public ofRectangle {
 public:
     ofxTextSequencer();
     
-    void    setSpeed(float _speed){speed = _speed;};
-    void    setWaitingTime( float _time){ waitingTime = _time;};
-    void    setNextPhrase(ofxTextPhrase &_phrase );
+    void    setSpeed(float _speed){ speed = _speed;};
+    void    setSecForChar( float _secForChar){ secForChar = _secForChar; };
+    void    setSecBetweenPhrases( float _secBetweenPhrase){ secBetweenPhrase = _secBetweenPhrase;};
+    void    setNextPhrase(textPhrase &_phrase );
     
     float   getNormTransitionValue(){ return sin( (countDown/seconds) * PI );};
+    
     bool    load(string _xmlFile);
     void    play(){ bPlay = true; };
     
     void    stop(){ bPlay = false;};
-    void    showMessage(string _message, ofxHorizontalAlignment _hAlign = OF_TEXT_ALIGN_LEFT, ofxVerticalAlignment _vAlign = OF_TEXT_ALIGN_TOP, float _speed = 1.0 );
+    void    showMessage( textPhrase &_phrase );
+    void    showMessage(string _message, horizontalAlignment _hAlign = OF_TEXT_ALIGN_LEFT, verticalAlignment _vAlign = OF_TEXT_ALIGN_TOP, float _speed = 1.0 );
     
     void    draw();
     
 private:
-    vector<ofxTextPhrase> script;
-    ofxTextPhrase   message;
+    string  spin(string _orginalText, int _nChars, int _offset);
+    vector<textPhrase> script;
+    textPhrase   message;
     
-    ofxTextBlock  textBlock;
+    ofxTextShape    *text;
     
-    float   waitingTime, secondsForChar;
+    textShape   defaultShape;
+    string      defaultFontFile;
+    float       defaultFontSize, defaultFontDpi, defaultSpeed;
+    verticalAlignment   defaultVertAlign;
+    horizontalAlignment defaultHoriAlign;
+    
+    float   secBetweenPhrase, secForChar;
     float   speed, seconds, countDown;
     int     currentLine;
     

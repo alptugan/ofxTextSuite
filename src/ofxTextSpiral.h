@@ -28,9 +28,7 @@ public:
 
 protected:
     void  _loadWords(){
-        
         letters = new letterArc[rawText.length()];
-        
         
         if ( vAlignment == OF_TEXT_ALIGN_TOP){
             proportion = -1.0 * abs(proportion);
