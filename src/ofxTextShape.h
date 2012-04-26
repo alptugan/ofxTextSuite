@@ -42,21 +42,30 @@ public:
     
     float getCharacterWidth(char ch){
         if (ch==' ') ch='i';
-        if (ch=='á') ch='a';
-        if (ch=='é') ch='a';
-        if (ch=='í') ch='e';
-        if (ch=='ó') ch='o';
-        if (ch=='ú') ch='u';
-        if (ch=='à') ch='a';
-        if (ch=='è') ch='a';
-        if (ch=='ì') ch='e';
-        if (ch=='ò') ch='o';
-        if (ch=='ù') ch='u';
-        if (ch=='ä') ch='a';
-        if (ch=='ë') ch='a';
-        if (ch=='ï') ch='e';
-        if (ch=='ö') ch='o';
-        if (ch=='ü') ch='u';
+        if (ch=='\xE0') ch='a'; //à
+        if (ch=='\xE1') ch='a'; //á
+        if (ch=='\xE2') ch='a'; //â
+        if (ch=='\xE3') ch='a'; //ã
+        if (ch=='\xE4') ch='a'; //ä
+        if (ch=='\xE6') ch='a'; //æ
+        if (ch=='\xE8') ch='e'; //è
+        if (ch=='\xE9') ch='e'; //é
+        if (ch=='\xEA') ch='e'; //ê
+        if (ch=='\xEB') ch='e'; //ë
+        if (ch=='\xEC') ch='i'; //ì
+        if (ch=='\xED') ch='i'; //í
+        if (ch=='\xEE') ch='i'; //î
+        if (ch=='\xEF') ch='i'; //ï
+        if (ch=='\xF2') ch='o'; //ò
+        if (ch=='\xF3') ch='o'; //ó
+        if (ch=='\xF4') ch='o'; //ô
+        if (ch=='\xF5') ch='o'; //õ
+        if (ch=='\xF6') ch='o'; //ö
+        if (ch=='\xF9') ch='u'; //ù
+        if (ch=='\xFA') ch='u'; //ú
+        if (ch=='\xFB') ch='u'; //û
+        if (ch=='\xFC') ch='u'; //ü
+        if (ch=='\xC7') ch='c'; //ç
         return cps[ch-NUM_CHARACTER_TO_START].setWidth;
     }
 };
@@ -99,13 +108,14 @@ public:
 protected:
     virtual void    _loadWords(){};
     virtual void    _subsChars(string & origString){  
-        static charSubstitution chars[]={ {"√†","\xE0"}, {"√°","\xE1"}, {"√¢","\xE2"}, {"√£","\xE3"}, {"√§","\xE4"}, {"√¶","\xE6"}, {"√≤","\xF2"},{"√≥","\xF3"}, {"√¥","\xF4"}, {"√µ","\xF5"}, {"√∂","\xF6"}, {"√π","\xF9"}, {"√∫","\xFA"}, {"√ª","\xFB"}, {"√º","\xFC"}, {"√®","\xE8"}, {"√©","\xE9"}, {"√™","\xEA"}, {"√´","\xEB"}, {"√¨","\xEC"}, {"√≠","\xED"}, {"√Æ","\xEE"}, {"√Ø","\xEF"}, {"√ß","\xE7"}, {"√á","\xC7"} };  
+        
+        static charSubstitution chars[]={ {"√†","\xE0"}, {"√°","\xE1"}, {"√¢","\xE2"}, {"√£","\xE3"}, {"√§","\xE4"}, {"√¶","\xE6"}, {"√≤","\xF2"},{"√≥","\xF3"}, {"√¥","\xF4"}, {"√µ","\xF5"}, {"√∂","\xF6"}, {"√π","\xF9"}, {"√∫","\xFA"}, {"√ª","\xFB"}, {"√º","\xFC"}, {"√®","\xE8"}, {"√©","\xE9"}, {"√™","\xEA"}, {"√´","\xEB"}, {"√¨","\xEC"}, {"√≠","\xED"}, {"√Æ","\xEE"}, {"√Ø","\xEF"}, {"√ß","\xE7"}, {"√á","\xC7"} }; 
         
         for(int i=0; i<24; i++){  
             while(origString.find(chars[i].character) !=string::npos){  
                 origString = origString.substr(0,origString.find(chars[i].character)) + chars[i].code + origString.substr(origString.find(chars[i].character)+2);
             }  
-        };  
+        }; 
     }
     
     textFont            font;

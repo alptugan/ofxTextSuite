@@ -172,8 +172,16 @@ void ofxTextSequencer::showMessage( textPhrase &_phrase ){
 }
 
 void ofxTextSequencer::setNextPhrase(textPhrase &_phrase ){
-    countDown   = _phrase.seconds;
-    seconds     = _phrase.seconds;
+    rawText     = _phrase.text;
+    spin        = _phrase.spin;
+    
+    seconds = _phrase.seconds;
+    
+    if (spin > 0){
+        seconds = (rawText.length() + spin*2) * secForChar;
+    }
+    
+    countDown   = seconds;
     speed       = _phrase.speed;
 
     delete  text;
@@ -227,9 +235,12 @@ void ofxTextSequencer::draw(){
         }
     } else {
         
-        if (text != NULL)
+        if (text != NULL){
+            if ( spin > 0){
+                text->setText(spinningString( rawText, spin , (1.0-(countDown/seconds))*(rawText.size()+spin) ));
+            }
             text->draw();
-        else
+        } else
             ofLog(OF_LOG_ERROR,"Text trying to be render with out loading it");
         
         if ( countDown <= 0){
@@ -241,6 +252,27 @@ void ofxTextSequencer::draw(){
     } 
 }
 
-string ofxTextSequencer::spin(string _orginalText, int _nChars, int _offset){
+string ofxTextSequencer::spinningString(string _orginalText, int _nChars, int _offset){
+    string rta;
     
+    int indexText = 0;
+    
+    if ( _offset > _nChars){
+        indexText = _offset - _nChars;
+    }
+    for (int i = 0; i < (_orginalText.size()+_nChars); i++){
+        
+        if ( i < _nChars){
+            if ( i >= _nChars - _offset){
+                if ( indexText < _orginalText.size())
+                    rta += _orginalText[indexText];
+                else 
+                    rta += " ";
+                indexText++;
+            } else 
+                rta += " ";
+        }
+    }
+    
+    return rta;
 }

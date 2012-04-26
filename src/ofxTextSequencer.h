@@ -48,10 +48,11 @@ public:
     void    draw();
     
 private:
-    string  spin(string _orginalText, int _nChars, int _offset);
+    string      spinningString(string _orginalText, int _nChars, int _offset);
     vector<textPhrase> script;
-    textPhrase   message;
+    textPhrase      message;
     
+    string          rawText;
     ofxTextShape    *text;
     
     textShape   defaultShape;
@@ -62,7 +63,7 @@ private:
     
     float   secBetweenPhrase, secForChar;
     float   speed, seconds, countDown;
-    int     currentLine;
+    int     currentLine, spin;
     
     bool    bWaiting, bMessage, bPlay;
 };
