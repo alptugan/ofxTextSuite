@@ -16,7 +16,7 @@ public:
         letters = NULL;
         
         scale   = 1.0;
-        proportion = 0.29;
+        proportion = 0.5;
         angle   = 0;
         radius  = 300;
         
