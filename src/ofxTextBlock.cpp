@@ -28,8 +28,8 @@ ofxTextBlock::ofxTextBlock(){
     scale       =   1.0f;
     bWraping    =   false;
     
-    hAlignment  =   OF_TEXT_ALIGN_LEFT;
-    vAlignment  =   OF_TEXT_ALIGN_TOP;  
+    hAlignment  =   OF_TEXT_ALIGN_CENTER;
+    vAlignment  =   OF_TEXT_ALIGN_MIDDLE;  
 }
 
 void ofxTextBlock::loadFont(string _fontLocation, float _fontSize, int _dpi){

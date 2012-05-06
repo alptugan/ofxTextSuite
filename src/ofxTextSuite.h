@@ -23,7 +23,4 @@
 #include "ofxTextArc.h"
 #include "ofxTextSpiral.h"
 #include "ofxTextBlock.h"
-
-#include "ofxTextSequencer.h"
-
 #endif

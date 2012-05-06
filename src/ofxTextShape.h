@@ -95,6 +95,8 @@ public:
         vAlignment = _vAlignment;
     };
     
+    virtual string  getText()const{return rawText;};
+    
     virtual int     length(){return rawText.length();};
     virtual void    clear(){ rawText.clear();};
     
