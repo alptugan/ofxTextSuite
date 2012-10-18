@@ -29,6 +29,18 @@ class wordBlock {
         float           width;
         float           height;
         ofColor         color;
+		
+        ofTrueTypeFont  defaultFont;
+		bool			hasFormat;
+
+		void setFont(string fontLocation, float fontSize, bool antiAliased) {
+			hasFormat = true;
+
+			defaultFont.loadFont(fontLocation, fontSize, antiAliased, true);
+
+			width   = defaultFont.stringWidth (rawWord);
+			height  = defaultFont.stringHeight(rawWord);
+		}
 
 };
 
@@ -42,6 +54,17 @@ class lineBlock {
 
 };
 
+
+class textFormat {
+    public:
+		string	tagOpened;
+		string	tagClosed;
+		string	font;
+		int		size;
+		ofColor	color;
+		bool antiAliesed;
+};
+
 //Just a helpful set of enumerated constants.
 enum TextBlockAlignment { OF_TEXT_ALIGN_LEFT, OF_TEXT_ALIGN_RIGHT, OF_TEXT_ALIGN_JUSTIFIED, OF_TEXT_ALIGN_CENTER };
 
@@ -53,15 +76,20 @@ class ofxTextBlock
 
         string          rawText;
         ofTrueTypeFont  defaultFont;
+        ofColor         defaultColor;
+		int				defaultLineWidth;
         wordBlock       blankSpaceWord;
         float           scale;
 
         vector<wordBlock>   words;
         vector<lineBlock>   lines;
+        vector<textFormat>  formats;
 
-        void    init(string fontLocation, float fontSize);
+        void    init(string fontLocation, float fontSize, bool antiAliased=true);
 
         void    setText(string _inputText);
+		void	setHtmlText(string _inputText);
+		void	setFormat(textFormat format);
 
         int     wrapTextX(float lineWidth);                 //Returns the number of lines it formed.
         void    wrapTextArea(float rWidth, float rHeight);
