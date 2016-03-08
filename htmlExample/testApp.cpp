@@ -5,18 +5,18 @@ void testApp::setup(){
 
 	ofBackground(0,0,0);
 
-    myText.init("VitesseSans-Medium.otf", 80);
+    myText.init("verdana.ttf", 40);
 
 	myTextFormat.tagOpened = "<b>";
 	myTextFormat.tagClosed = "<\/b>";
-	myTextFormat.font = "VitesseSans-Book.otf";
-	myTextFormat.size = 80;
+	myTextFormat.font = "frabk.ttf";
+	myTextFormat.size = 40;
 	myTextFormat.color=ofColor(0,125,125);
 	myTextFormat.antiAliesed=true;
 	
 	myText.setFormat(myTextFormat);
 
-    myText.setHtmlText("Welcome. <b>L</b> is for Left, while <b>R</b> is for Right. Center it up with <b>C</b>, or hit <b>J</b> to Justify.  Press <b>1</b> to wrap constrained on x, or <b>2</b> to fit type to the area.");
+    myText.setHtmlText("Welcome. <b>L</b> is for Left, while <b>R</b> is for Right. Center it up with <b>C</b>, or hit <b>J</b> to Justify.  Press <b>1</b> to wrap constrained on x, or <b>2</b> to fit type to the area.<br/><br/>Breaked two lines.");
 
 	alignment = OF_TEXT_ALIGN_LEFT;
 
@@ -32,7 +32,7 @@ void testApp::update(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
-
+	ofClear(0);
     switch (alignment) {
 
         case OF_TEXT_ALIGN_LEFT:
