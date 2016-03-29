@@ -1,4 +1,4 @@
 # ofxTextSuite
 Openframeworks Text Manipulation Suite
 
-This project is looking for a new owner/maintainer. If you're keen then drop me a line by logging an issue.
+This project has been transferred to me from [Luke Malcolm](https://github.com/lukemalcolm)
