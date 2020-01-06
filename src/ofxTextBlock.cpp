@@ -33,8 +33,8 @@ ofxTextBlock::~ofxTextBlock()
 
 void ofxTextBlock::init(string fontLocation, float fontSize){
 
-    defaultFont.loadFont(fontLocation, fontSize, true, true);
-
+    // defaultFont.loadFont(fontLocation, fontSize, true, true);
+    defaultFont.load(fontLocation, fontSize, true, true);
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
     blankSpaceWord.width   = defaultFont.stringWidth ("x");
