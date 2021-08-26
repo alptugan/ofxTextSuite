@@ -146,22 +146,21 @@ ofRectangle ofxTextBlock::drawCenter(float x, float y){
                 glTranslatef(x, y, 0.0f);
 
                 glScalef(scale, scale, scale);
-
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 
                 float wordWidth = defaultFont.stringWidth(words[currentWordID].rawWord.c_str());
                 float wordHeight = defaultFont.stringHeight(words[currentWordID].rawWord.c_str());
+                
+                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 
                 if(l == 0 && w == 0){
                     bb = ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale);
                 }else{
                     bb = bb.getUnion(ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale));
                 }
-                currX += words[currentWordID].width;
-
                 
+                currX += words[currentWordID].width;
                 glPopMatrix();
-
+                
             }
             currX = 0;
 
@@ -478,6 +477,12 @@ void ofxTextBlock::_loadWords(){
 
     for(int i=0;i < tokens.size(); i++)
     {
+               
+        if(isinf(defaultFont.stringWidth(tokens.at(i))) || isinf(defaultFont.stringHeight(tokens.at(i)))){
+            ofLog(OF_LOG_VERBOSE,"isinf() %i, %s\n ",i,tokens.at(i).c_str());
+            continue;
+        }
+    
         tmpWord.rawWord = tokens.at(i);
         tmpWord.width   = defaultFont.stringWidth(tmpWord.rawWord);
         tmpWord.height  = defaultFont.stringHeight(tmpWord.rawWord);
