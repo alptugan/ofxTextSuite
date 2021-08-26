@@ -70,18 +70,19 @@ class ofxTextBlock
         void    setLineHeight(float lineHeight);
         void    setColor(int r, int g, int b, int a);
 
-        void    draw(float x, float y);                    //Draws left align.
-        void    drawLeft(float x, float y);
-        void    drawRight(float x, float y);
-        void    drawCenter(float x, float y);
-        void    drawJustified(float x, float y, float boxWidth);
+    ofRectangle    draw(float x, float y);                    //Draws left align.
+    ofRectangle    drawLeft(float x, float y);
+    ofRectangle    drawRight(float x, float y);
+    ofRectangle    drawCenter(float x, float y);
+    ofRectangle    drawJustified(float x, float y, float boxWidth);
 
 
         void    forceScale(float _scale);
 
         float   getWidth();
         float   getHeight();
-
+//    ofRectangle getBoundingBox();
+    
     protected:
 
         void    _loadWords();

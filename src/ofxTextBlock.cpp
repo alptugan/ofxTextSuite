@@ -37,7 +37,7 @@ void ofxTextBlock::init(string fontLocation, float fontSize){
     defaultFont.load(fontLocation, fontSize, true, true);
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
-    blankSpaceWord.width   = defaultFont.stringWidth ("x");
+    blankSpaceWord.width   = defaultFont.stringWidth ("ii"); //defaultFont.stringWidth ("x");
     blankSpaceWord.height  = defaultFont.stringHeight("i");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
 
@@ -49,13 +49,12 @@ void ofxTextBlock::setText(string _inputText){
     wrapTextForceLines(1);
 }
 
-void ofxTextBlock::draw(float x, float y){
+ofRectangle ofxTextBlock::draw(float x, float y){
 
-    drawLeft(x, y);
-
+    return drawLeft(x, y);
 }
 
-void ofxTextBlock::drawLeft(float x, float y){
+ofRectangle ofxTextBlock::drawLeft(float x, float y){
 
     string  strToDraw;
     int     currentWordID;
@@ -63,7 +62,8 @@ void ofxTextBlock::drawLeft(float x, float y){
     float   drawY;
 
     float currX = 0;
-
+    ofRectangle bb;
+    
     if (words.size() > 0) {
 
         for(int l=0;l < lines.size(); l++)
@@ -72,15 +72,26 @@ void ofxTextBlock::drawLeft(float x, float y){
             {
                 currentWordID = lines[l].wordsID[w];
 
-                drawX = x + currX;
-                drawY = y + (defaultFont.getLineHeight() * (l + 1));
+                drawX = currX;
+                drawY = (defaultFont.getLineHeight() * (l + 1));
 
+                
                 ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 glPushMatrix();
-                //glTranslatef(drawX, drawY, 0.0f);
+                glTranslatef(x, y, 0.0f);
                 glScalef(scale, scale, scale);
 
                 defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                
+                float wordWidth = defaultFont.stringWidth(words[currentWordID].rawWord.c_str());
+                float wordHeight = defaultFont.stringHeight(words[currentWordID].rawWord.c_str());
+               
+                if(l == 0 && w == 0){
+                    bb = ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale);
+                }else{
+                    bb = bb.getUnion(ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale));
+                }
+                
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -90,9 +101,11 @@ void ofxTextBlock::drawLeft(float x, float y){
 
         }
     }
+    
+    return bb;    
 }
 
-void ofxTextBlock::drawCenter(float x, float y){
+ofRectangle ofxTextBlock::drawCenter(float x, float y){
 
     string  strToDraw;
     int     currentWordID;
@@ -101,7 +114,8 @@ void ofxTextBlock::drawCenter(float x, float y){
     float   lineWidth;
 
     float currX = 0;
-
+    ofRectangle bb;
+    
     if (words.size() > 0) {
 
         for(int l=0;l < lines.size(); l++)
@@ -117,6 +131,8 @@ void ofxTextBlock::drawCenter(float x, float y){
 
             for(int w=0;w < lines[l].wordsID.size(); w++)
             {
+                
+               
                 currentWordID = lines[l].wordsID[w];
 
                 drawX = -(lineWidth / 2) + currX;
@@ -132,8 +148,18 @@ void ofxTextBlock::drawCenter(float x, float y){
                 glScalef(scale, scale, scale);
 
                 defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                
+                float wordWidth = defaultFont.stringWidth(words[currentWordID].rawWord.c_str());
+                float wordHeight = defaultFont.stringHeight(words[currentWordID].rawWord.c_str());
+                
+                if(l == 0 && w == 0){
+                    bb = ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale);
+                }else{
+                    bb = bb.getUnion(ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale));
+                }
                 currX += words[currentWordID].width;
 
+                
                 glPopMatrix();
 
             }
@@ -141,9 +167,11 @@ void ofxTextBlock::drawCenter(float x, float y){
 
         }
     }
+    
+    return bb;
 }
 
-void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
+ofRectangle ofxTextBlock::drawJustified(float x, float y, float boxWidth){
 
     string  strToDraw;
     int     currentWordID;
@@ -154,7 +182,9 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     float   pixelsPerSpace;
 
     float currX = 0;
-
+    ofRectangle bb;
+    float bottomSide = -INT_MAX;
+    
     if (words.size() > 0) {
 
 
@@ -179,7 +209,7 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
 
                 drawX = currX;
                 drawY = defaultFont.getLineHeight() * (l + 1);
-
+                
                 ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 glPushMatrix();
                 //Move to top left point using pre-scaled co-ordinates
@@ -189,11 +219,21 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 if (words[currentWordID].rawWord != " ") {
                     defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                     currX += words[currentWordID].width;
+                    
+                    float wordWidth = defaultFont.stringWidth(words[currentWordID].rawWord.c_str());
+                    float wordHeight = defaultFont.stringHeight(words[currentWordID].rawWord.c_str());
+                    if(l == 0 && w == 0){
+                        bb = ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale);
+                    }else{
+                        bb = bb.getUnion(ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale));
+                    }
+
                 }
                 else {
                     currX += pixelsPerSpace;
                 }
-
+                
+              
 
                 glPopMatrix();
 
@@ -202,9 +242,11 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
 
         }
     }
+    
+    return bb;
 }
 
-void ofxTextBlock::drawRight(float x, float y){
+ofRectangle ofxTextBlock::drawRight(float x, float y){
 
     string  strToDraw;
     int     currentWordID;
@@ -212,7 +254,8 @@ void ofxTextBlock::drawRight(float x, float y){
     float   drawY;
 
     float currX = 0;
-
+    ofRectangle bb;
+    
     if (words.size() > 0) {
 
         for(int l=0;l < lines.size(); l++)
@@ -225,7 +268,7 @@ void ofxTextBlock::drawRight(float x, float y){
 
                 drawX = -currX - words[currentWordID].width;
                 drawY = defaultFont.getLineHeight() * (l + 1);
-
+                
                 ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
 
                 glPushMatrix();
@@ -235,6 +278,16 @@ void ofxTextBlock::drawRight(float x, float y){
                 glScalef(scale, scale, scale);
 
                 defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                
+                float wordWidth = defaultFont.stringWidth(words[currentWordID].rawWord.c_str());
+                float wordHeight = defaultFont.stringHeight(words[currentWordID].rawWord.c_str());
+                
+                if(l == 0 && w == lines[l].wordsID.size() - 1){
+                    bb = ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale);
+                }else{
+                    bb = bb.getUnion(ofRectangle(x+(drawX*scale),y+(drawY*scale),wordWidth*scale,-wordHeight*scale));
+                }
+                
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -244,6 +297,8 @@ void ofxTextBlock::drawRight(float x, float y){
 
         }
     }
+    
+    return bb;
 }
 
 void ofxTextBlock::_trimLineSpaces()
@@ -458,6 +513,37 @@ float ofxTextBlock::_getWidthOfWords(){
 
 }
 
+//ofRectangle ofxTextBlock::getBoundingBox(){
+//    
+//    ofRectangle bb_rect(0,0,10,10);
+//    
+//    int   currentWordID;
+//
+////    float currX = 0.0f;
+////    float minX = INT_MAX;
+////    float maxWidth  = 0.0f;
+////
+////    if (words.size() > 0) {
+////
+////        bb_rect.setWidth(defaultFont.getLineHeight() * scale * lines.size());
+////        
+////        for(int l=0;l < lines.size(); l++)
+////        {
+////            for(int w=0;w < lines[l].wordsID.size(); w++)
+////            {
+////                currentWordID = lines[l].wordsID[w];
+////                currX += words[currentWordID].width;
+////            }
+////            maxWidth = MAX(maxWidth, currX);
+////            currX = 0.0f;
+////        }
+////        bb_rect.setWidth(maxWidth * scale);
+////       
+////    }
+//   
+//    return bb_rect;
+//    
+//}
 float ofxTextBlock::getWidth(){
 
     int   currentWordID;
