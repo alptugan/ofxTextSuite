@@ -40,6 +40,7 @@ void ofxTextBlock::init(string fontLocation, float fontSize){
     blankSpaceWord.width   = defaultFont.stringWidth ("x");
     blankSpaceWord.height  = defaultFont.stringHeight("i");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
+    blankSpaceWord.hasFormat = false;
 
 }
 
@@ -49,13 +50,84 @@ void ofxTextBlock::setText(string _inputText){
     wrapTextForceLines(1);
 }
 
+void ofxTextBlock::setHtmlText(string _inputText) {
+    rawText = _inputText;
+    _loadWords();
+
+    for (int i = 0; i < words.size(); i++) {
+        string rawWord = words[i].rawWord;
+        if (rawWord.find("<br\/>") != string::npos) {
+            //take the word before break line
+            words[i].rawWord = words[i].rawWord.substr(0, words[i].rawWord.find("<br\/>"));
+            words[i].width = defaultFont.stringWidth(words[i].rawWord);
+            //add break line
+            wordBlock breaklineWord;
+            breaklineWord.isBreakLine = true;
+            breaklineWord.hasFormat = false;
+            breaklineWord.width = 0;
+            words.insert(words.begin() + 1 + i, breaklineWord);
+            //add the word after break line
+            if (rawWord.substr(rawWord.find("<br\/>") + string("<br\/>").size()) != "") {
+                wordBlock tmpWord;
+                tmpWord.rawWord = rawWord.substr(rawWord.find("<br\/>") + string("<br\/>").size());
+                tmpWord.width = defaultFont.stringWidth(tmpWord.rawWord);
+                tmpWord.height = defaultFont.stringHeight(tmpWord.rawWord);
+                tmpWord.color = defaultColor;
+                tmpWord.hasFormat = false;
+                tmpWord.isBreakLine = false;
+                words.insert(words.begin() + 2 + i, tmpWord);
+            }
+        }
+    }
+
+    for (int j = 0; j < formats.size(); j++) {
+        bool inside = false;
+
+        for (int i = 0; i < words.size(); i++) {
+            string rawWord = words[i].rawWord;
+            if (rawWord.find(formats[j].tagOpened) != string::npos) {
+                words[i].rawWord = words[i].rawWord.substr(words[i].rawWord.find(formats[j].tagOpened) + formats[j].tagOpened.size());
+                inside = true;
+            }
+
+            if (inside && words[i].rawWord != " ") {
+                words[i].setFont(formats[j].font, formats[j].size, formats[j].antiAliesed);
+                words[i].color = formats[j].color;
+            }
+
+            if (rawWord.find(formats[j].tagClosed) != string::npos) {
+                words[i].rawWord = words[i].rawWord.substr(0, words[i].rawWord.find(formats[j].tagClosed));
+                words[i].setFont(formats[j].font, formats[j].size, formats[j].antiAliesed);
+                words[i].color = formats[j].color;
+
+                if (rawWord.substr(rawWord.find(formats[j].tagClosed) + formats[j].tagClosed.size()) != "") {
+                    wordBlock tmpWord;
+                    tmpWord.rawWord = rawWord.substr(rawWord.find(formats[j].tagClosed) + formats[j].tagClosed.size());
+                    tmpWord.width = defaultFont.stringWidth(tmpWord.rawWord);
+                    tmpWord.height = defaultFont.stringHeight(tmpWord.rawWord);
+                    tmpWord.color = defaultColor;
+                    tmpWord.hasFormat = false;
+                    tmpWord.isBreakLine = false;
+                    words.insert(words.begin() + 1 + i, tmpWord);
+                }
+
+                inside = false;
+            }
+        }
+    }
+
+    wrapTextForceLines(1);
+}
+
+
 void ofxTextBlock::draw(float x, float y){
 
     drawLeft(x, y);
 
 }
 
-void ofxTextBlock::drawLeft(float x, float y){
+
+void ofxTextBlock::drawLeft(float x, float y) {
 
     string  strToDraw;
     int     currentWordID;
@@ -66,9 +138,9 @@ void ofxTextBlock::drawLeft(float x, float y){
 
     if (words.size() > 0) {
 
-        for(int l=0;l < lines.size(); l++)
+        for (int l = 0; l < lines.size(); l++)
         {
-            for(int w=0;w < lines[l].wordsID.size(); w++)
+            for (int w = 0; w < lines[l].wordsID.size(); w++)
             {
                 currentWordID = lines[l].wordsID[w];
 
@@ -80,7 +152,12 @@ void ofxTextBlock::drawLeft(float x, float y){
                 //glTranslatef(drawX, drawY, 0.0f);
                 glScalef(scale, scale, scale);
 
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                if (words[currentWordID].hasFormat) {
+                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
+                else {
+                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -92,7 +169,7 @@ void ofxTextBlock::drawLeft(float x, float y){
     }
 }
 
-void ofxTextBlock::drawCenter(float x, float y){
+void ofxTextBlock::drawCenter(float x, float y) {
 
     string  strToDraw;
     int     currentWordID;
@@ -104,18 +181,18 @@ void ofxTextBlock::drawCenter(float x, float y){
 
     if (words.size() > 0) {
 
-        for(int l=0;l < lines.size(); l++)
+        for (int l = 0; l < lines.size(); l++)
         {
 
             //Get the length of the line.
             lineWidth = 0;
-            for(int w=0;w < lines[l].wordsID.size(); w++)
+            for (int w = 0; w < lines[l].wordsID.size(); w++)
             {
                 currentWordID = lines[l].wordsID[w];
                 lineWidth += words[currentWordID].width;
             }
 
-            for(int w=0;w < lines[l].wordsID.size(); w++)
+            for (int w = 0; w < lines[l].wordsID.size(); w++)
             {
                 currentWordID = lines[l].wordsID[w];
 
@@ -131,7 +208,12 @@ void ofxTextBlock::drawCenter(float x, float y){
 
                 glScalef(scale, scale, scale);
 
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                if (words[currentWordID].hasFormat) {
+                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
+                else {
+                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -143,7 +225,7 @@ void ofxTextBlock::drawCenter(float x, float y){
     }
 }
 
-void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
+void ofxTextBlock::drawJustified(float x, float y, float boxWidth) {
 
     string  strToDraw;
     int     currentWordID;
@@ -158,13 +240,13 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     if (words.size() > 0) {
 
 
-        for(int l=0;l < lines.size(); l++)
+        for (int l = 0; l < lines.size(); l++)
         {
             //Find number of spaces and width of other words;
             spacesN = 0;
             nonSpaceWordWidth = 0;
 
-            for(int w=0;w < lines[l].wordsID.size(); w++)
+            for (int w = 0; w < lines[l].wordsID.size(); w++)
             {
                 currentWordID = lines[l].wordsID[w];
                 if (words[currentWordID].rawWord == " ") spacesN++;
@@ -173,7 +255,7 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
 
             pixelsPerSpace = ((boxWidth / scale) - (x / scale) - nonSpaceWordWidth) / spacesN;
 
-            for(int w=0;w < lines[l].wordsID.size(); w++)
+            for (int w = 0; w < lines[l].wordsID.size(); w++)
             {
                 currentWordID = lines[l].wordsID[w];
 
@@ -187,7 +269,12 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 glScalef(scale, scale, scale);
 
                 if (words[currentWordID].rawWord != " ") {
-                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                    if (words[currentWordID].hasFormat) {
+                        words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                    }
+                    else {
+                        defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                    }
                     currX += words[currentWordID].width;
                 }
                 else {
@@ -204,7 +291,7 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     }
 }
 
-void ofxTextBlock::drawRight(float x, float y){
+void ofxTextBlock::drawRight(float x, float y) {
 
     string  strToDraw;
     int     currentWordID;
@@ -215,10 +302,10 @@ void ofxTextBlock::drawRight(float x, float y){
 
     if (words.size() > 0) {
 
-        for(int l=0;l < lines.size(); l++)
+        for (int l = 0; l < lines.size(); l++)
         {
 
-            for(int w=lines[l].wordsID.size() - 1; w >= 0; w--)
+            for (int w = lines[l].wordsID.size() - 1; w >= 0; w--)
             {
 
                 currentWordID = lines[l].wordsID[w];
@@ -234,7 +321,12 @@ void ofxTextBlock::drawRight(float x, float y){
                 glTranslatef(x, y, 0.0f);
                 glScalef(scale, scale, scale);
 
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                if (words[currentWordID].hasFormat) {
+                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
+                else {
+                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -245,6 +337,7 @@ void ofxTextBlock::drawRight(float x, float y){
         }
     }
 }
+
 
 void ofxTextBlock::_trimLineSpaces()
 {
@@ -500,17 +593,21 @@ void ofxTextBlock::setLineHeight(float lineHeight){
 
 void ofxTextBlock::setColor(int r, int g, int b, int a){
 
-    ofColor tmpColor;
-    tmpColor.r = r;
-    tmpColor.g = g;
-    tmpColor.b = b;
-    tmpColor.a = a;
+    defaultColor.r = r;
+    defaultColor.g = g;
+    defaultColor.b = b;
+    defaultColor.a = a;
 
     if (words.size() > 0) {
-        for(int i=0;i < words.size(); i++)
+        for (int i = 0; i < words.size(); i++)
         {
-           words[i].color = tmpColor;
-
+            words[i].color = defaultColor;
+            if (words[i].hasFormat) {
+                words[i].color.a = defaultColor.a;
+            }
+            else {
+                words[i].color = defaultColor;
+            }
         }
     }
 

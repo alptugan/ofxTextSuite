@@ -30,6 +30,29 @@ class wordBlock {
         float           height;
         ofColor         color;
 
+        ofTrueTypeFont  defaultFont;
+        bool			hasFormat;
+        bool			isBreakLine;
+
+        void setFont(string fontLocation, float fontSize, bool antiAliased) {
+            hasFormat = true;
+
+            defaultFont.loadFont(fontLocation, fontSize, antiAliased, true);
+
+            width = defaultFont.stringWidth(rawWord);
+            height = defaultFont.stringHeight(rawWord);
+        }
+
+};
+
+class textFormat {
+public:
+    string	tagOpened;
+    string	tagClosed;
+    string	font;
+    int		size;
+    ofColor	color;
+    bool antiAliesed;
 };
 
 
@@ -53,15 +76,20 @@ class ofxTextBlock
 
         string          rawText;
         ofTrueTypeFont  defaultFont;
+        ofColor         defaultColor;
+
         wordBlock       blankSpaceWord;
         float           scale;
 
         vector<wordBlock>   words;
         vector<lineBlock>   lines;
+        vector<textFormat>  formats;
 
         void    init(string fontLocation, float fontSize);
 
         void    setText(string _inputText);
+        void	setHtmlText(string _inputText);
+        void	setFormat(textFormat format);
 
         int     wrapTextX(float lineWidth);                 //Returns the number of lines it formed.
         void    wrapTextArea(float rWidth, float rHeight);
