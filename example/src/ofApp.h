@@ -1,9 +1,9 @@
-#ifndef _TEST_APP
-#define _TEST_APP
-
+#pragma once
 
 #include "ofMain.h"
 #include "ofxTextSuite.h"
+
+//#define TWEENZOR_ENABLED
 
 class ofApp : public ofBaseApp{
 
@@ -18,11 +18,14 @@ class ofApp : public ofBaseApp{
 		void mouseDragged(int x, int y, int button);
 		void mousePressed(int x, int y, int button);
 		void mouseReleased(int x, int y, int button);
-		void windowResized(int w, int h);
-
-		ofxTextBlock        myText;
+        void mouseEntered(int x, int y);
+        void mouseExited(int x, int y);
+        void windowResized(int w, int h);
+        void dragEvent(ofDragInfo dragInfo);
+        void gotMessage(ofMessage msg);
+        
+        int                 textBlockWidth, posX, posY;
+		ofxTextBlock        textBlock;
 		TextBlockAlignment  alignment;  //constants for controlling state
 
 };
-
-#endif

@@ -21,26 +21,145 @@
 
 ofxTextBlock::ofxTextBlock()
 {
-
-    scale       =   1.0f;
+    isAnimatedTextEnabled = false;
+    alphaBegin    = 0;
+    alphaEnd    = 255;
+    scale       = 1.0f;
+    animType    = "fadein";
+    _mainColor  = ofColor(255);
 
 }
 
 ofxTextBlock::~ofxTextBlock()
 {
     //dtor
+#ifdef TWEENZOR_ENABLED
+    if (isAnimatedTextEnabled) {
+        //Tweenzor::removeAllListeners();
+        //Tweenzor::destroy();
+        
+    }
+#endif
 }
 
-void ofxTextBlock::init(string fontLocation, float fontSize){
+void ofxTextBlock::init(string fontLocation, float fontSize, bool antiAliased){
 
-    // defaultFont.loadFont(fontLocation, fontSize, true, true);
     defaultFont.load(fontLocation, fontSize, true, true);
+
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
     blankSpaceWord.width   = defaultFont.stringWidth ("x");
     blankSpaceWord.height  = defaultFont.stringHeight("i");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
 
+    blankSpaceWord.hasFormat = false;
+    blankSpaceWord.isBreakLine = false;
+    
+}
+
+void ofxTextBlock::init(ofTrueTypeFont * _f, bool antiAliased) {
+
+    defaultFont = *_f;
+
+
+    //Set up the blank space word
+    blankSpaceWord.rawWord = " ";
+    blankSpaceWord.width = defaultFont.stringWidth("x");
+    blankSpaceWord.height = defaultFont.stringHeight("i");
+    blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
+
+    blankSpaceWord.hasFormat = false;
+    blankSpaceWord.isBreakLine = false;
+    
+}
+void ofxTextBlock::setHtmlText(string _inputText) {
+    rawText = _inputText;
+    _loadWords();
+
+    cls.resize(words.size());
+    for (int i = 0; i < words.size(); i++) {
+        string rawWord = words[i].rawWord;
+#ifdef WIN32
+        string delimiter = "<br\/>";
+#else
+        string delimiter = "<br/>";
+#endif
+        if (rawWord.find(delimiter) != string::npos) {
+            //take the word before break line
+            words[i].rawWord = words[i].rawWord.substr(0, words[i].rawWord.find(delimiter));
+            words[i].width = defaultFont.stringWidth(words[i].rawWord);
+            //add break line
+            wordBlock breaklineWord;
+            breaklineWord.isBreakLine = true;
+            breaklineWord.hasFormat = false;
+            breaklineWord.width = 0;
+            words.insert(words.begin() + 1 + i, breaklineWord);
+            cls.insert(cls.begin() + 1 + i, breaklineWord.color);
+            //add the word after break line
+            if (rawWord.substr(rawWord.find(delimiter) + string(delimiter).size()) != "") {
+                wordBlock tmpWord;
+                tmpWord.rawWord = rawWord.substr(rawWord.find(delimiter) + string(delimiter).size());
+                tmpWord.width = defaultFont.stringWidth(tmpWord.rawWord);
+                tmpWord.height = defaultFont.stringHeight(tmpWord.rawWord);
+                tmpWord.color = _mainColor;
+                tmpWord.hasFormat = false;
+                tmpWord.isBreakLine = false;
+                words.insert(words.begin() + 2 + i, tmpWord);
+                cls.insert(cls.begin() + 1 + i, tmpWord.color);
+            }
+            
+        }
+    }
+
+    for (int j = 0; j < formats.size(); j++) {
+        bool inside = false;
+
+        for (int i = 0; i < words.size(); i++) {
+            
+            string rawWord = words[i].rawWord;
+            if (rawWord.find(formats[j].tagOpened) != string::npos) {
+                words[i].rawWord = words[i].rawWord.substr(words[i].rawWord.find(formats[j].tagOpened) + formats[j].tagOpened.size());
+                inside = true;
+            }
+
+            if (inside && words[i].rawWord != " ") {
+                //words[i].setFont(formats[j].font, formats[j].size, formats[j].antiAliesed);
+                //words[i].color = formats[j].color;
+                words[i].rawWord = words[i].rawWord.substr(0, words[i].rawWord.find(formats[j].tagClosed));
+                words[i].setFont(formats[j].font, formats[j].size, formats[j].antiAliesed);
+                //words[i].color = formats[j].color;
+                cls[i] = (formats[j].color);
+            }
+
+            if (rawWord.find(formats[j].tagClosed) != string::npos) {
+                words[i].rawWord = words[i].rawWord.substr(0, words[i].rawWord.find(formats[j].tagClosed));
+                //words[i].setFont(formats[j].font, formats[j].size, formats[j].antiAliesed);
+                //words[i].color = formats[j].color;
+                cls[i] = (formats[j].color);
+                
+
+                if (rawWord.substr(rawWord.find(formats[j].tagClosed) + formats[j].tagClosed.size()) != "") {
+                    wordBlock tmpWord;
+                    tmpWord.rawWord = rawWord.substr(rawWord.find(formats[j].tagClosed) + formats[j].tagClosed.size());
+                    tmpWord.width = defaultFont.stringWidth(tmpWord.rawWord);
+                    tmpWord.height = defaultFont.stringHeight(tmpWord.rawWord);
+                    tmpWord.color = _mainColor;
+                    tmpWord.hasFormat = false;
+                    tmpWord.isBreakLine = false;
+                    words.insert(words.begin() + 1 + i, tmpWord);
+                  //  cls.insert(cls.begin() + 1 + i, _mainColor);
+                }
+
+                inside = false;
+            }
+        }
+    }
+    
+    wrapTextForceLines(1);
+}
+
+void ofxTextBlock::setFormat(textFormat format) {
+    formats.push_back(format);
 }
 
 void ofxTextBlock::setText(string _inputText){
@@ -50,13 +169,28 @@ void ofxTextBlock::setText(string _inputText){
 }
 
 void ofxTextBlock::draw(float x, float y){
-
+    
+    pos.x = x;
+    pos.y = y;
+#ifdef TWEENZOR_ENABLED
+    if(isAnimatedTextEnabled)
+        Tweenzor::update(ofGetElapsedTimeMillis());
+#endif
     drawLeft(x, y);
 
 }
 
 void ofxTextBlock::drawLeft(float x, float y){
-
+    
+    pos.x = x;
+    pos.y = y;
+    ofPushStyle();
+#ifdef TWEENZOR_ENABLED
+    if (isAnimatedTextEnabled)
+        Tweenzor::update(ofGetElapsedTimeMillis());
+#endif
+    
+    
     string  strToDraw;
     int     currentWordID;
     float   drawX;
@@ -75,12 +209,37 @@ void ofxTextBlock::drawLeft(float x, float y){
                 drawX = x + currX;
                 drawY = y + (defaultFont.getLineHeight() * (l + 1));
 
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
+                //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
+                if (isAnimatedTextEnabled) {
+                    if(currentAlpha.size() > 0)
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, currentAlpha[currentWordID]);
+                    else
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
+                }
+                else {
+                    ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
+
+                }
+                
                 glPushMatrix();
                 //glTranslatef(drawX, drawY, 0.0f);
                 glScalef(scale, scale, scale);
 
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                if (words[currentWordID].hasFormat) {
+                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
+                else {
+                    //ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, currentAlpha[currentWordID]);
+                    if (isAnimatedTextEnabled) {
+                        if(currentAlpha.size() > 0)
+                            ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, currentAlpha[currentWordID]);
+                    }else{
+                        ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, _mainColor.a);
+                    }
+                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
+
+                //defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -90,10 +249,18 @@ void ofxTextBlock::drawLeft(float x, float y){
 
         }
     }
+    ofPopStyle();
 }
 
 void ofxTextBlock::drawCenter(float x, float y){
-
+    
+    pos.x = x;
+    pos.y = y;
+#ifdef TWEENZOR_ENABLED
+    if (isAnimatedTextEnabled)
+        Tweenzor::update(ofGetElapsedTimeMillis());
+#endif
+    ofPushStyle();
     string  strToDraw;
     int     currentWordID;
     float   drawX;
@@ -122,8 +289,16 @@ void ofxTextBlock::drawCenter(float x, float y){
                 drawX = -(lineWidth / 2) + currX;
                 drawY = defaultFont.getLineHeight() * (l + 1);
 
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
+                if (isAnimatedTextEnabled) {
+                    if(currentAlpha.size() > 0)
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, currentAlpha[currentWordID]);
+                    else
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
+                }
+                else {
+                    ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
 
+                }
                 glPushMatrix();
 
                 //Move to central point using pre-scaled co-ordinates
@@ -131,7 +306,20 @@ void ofxTextBlock::drawCenter(float x, float y){
 
                 glScalef(scale, scale, scale);
 
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                if (words[currentWordID].hasFormat) {
+                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), floor(drawX), floor(drawY));
+                }
+                else {
+                    //ofSetColor(_mainColor);
+                    if (isAnimatedTextEnabled) {
+                        if(currentAlpha.size() > 0)
+                            ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, currentAlpha[currentWordID]);
+                    }else{
+                        ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, _mainColor.a);
+                    }
+                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), floor(drawX), floor(drawY));
+                }
+                //defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -141,10 +329,19 @@ void ofxTextBlock::drawCenter(float x, float y){
 
         }
     }
+    ofPopStyle();
+    
 }
 
 void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
-
+    
+    pos.x = x;
+    pos.y = y;
+#ifdef TWEENZOR_ENABLED
+    if (isAnimatedTextEnabled)
+        Tweenzor::update(ofGetElapsedTimeMillis());
+#endif
+    ofPushStyle();
     string  strToDraw;
     int     currentWordID;
     float   drawX;
@@ -152,7 +349,6 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     int     spacesN;
     float   nonSpaceWordWidth;
     float   pixelsPerSpace;
-
     float currX = 0;
 
     if (words.size() > 0) {
@@ -170,8 +366,14 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 if (words[currentWordID].rawWord == " ") spacesN++;
                 else nonSpaceWordWidth += words[currentWordID].width;
             }
-
-            pixelsPerSpace = ((boxWidth / scale) - (x / scale) - nonSpaceWordWidth) / spacesN;
+            if (l == lines.size()-1) {
+                //avoid justfy for the last line
+                pixelsPerSpace = blankSpaceWord.width;
+            }
+            else {
+                pixelsPerSpace = ((boxWidth / scale) - (x / scale) - nonSpaceWordWidth) / spacesN;
+            }
+            
 
             for(int w=0;w < lines[l].wordsID.size(); w++)
             {
@@ -180,14 +382,37 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 drawX = currX;
                 drawY = defaultFont.getLineHeight() * (l + 1);
 
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
+                //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
+                if (isAnimatedTextEnabled) {
+                    if(currentAlpha.size() > 0)
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, currentAlpha[currentWordID]);
+                    else
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
+                }
+                else {
+                    ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
+
+                }
                 glPushMatrix();
                 //Move to top left point using pre-scaled co-ordinates
                 glTranslatef(x, y, 0.0f);
                 glScalef(scale, scale, scale);
 
                 if (words[currentWordID].rawWord != " ") {
-                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                    //defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                    if (words[currentWordID].hasFormat) {
+                        words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), floor(drawX), floor(drawY));
+                    }
+                    else {
+                        //ofSetColor(_mainColor);
+                        if (isAnimatedTextEnabled) {
+                            if(currentAlpha.size() > 0)
+                                ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, currentAlpha[currentWordID]);
+                        }else{
+                            ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, _mainColor.a);
+                        }
+                        defaultFont.drawString(words[currentWordID].rawWord.c_str(), floor(drawX), floor(drawY));
+                    }
                     currX += words[currentWordID].width;
                 }
                 else {
@@ -202,10 +427,19 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
 
         }
     }
+    ofPopStyle();
+
 }
 
 void ofxTextBlock::drawRight(float x, float y){
-
+    
+    pos.x = x;
+    pos.y = y;
+#ifdef TWEENZOR_ENABLED
+    if (isAnimatedTextEnabled)
+        Tweenzor::update(ofGetElapsedTimeMillis());
+#endif
+    ofPushStyle();
     string  strToDraw;
     int     currentWordID;
     float   drawX;
@@ -226,7 +460,17 @@ void ofxTextBlock::drawRight(float x, float y){
                 drawX = -currX - words[currentWordID].width;
                 drawY = defaultFont.getLineHeight() * (l + 1);
 
-                ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
+                //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
+                if (isAnimatedTextEnabled) {
+                    if(currentAlpha.size() > 0)
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, currentAlpha[currentWordID]);
+                    else
+                        ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
+                }
+                else {
+                    ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
+
+                }
 
                 glPushMatrix();
 
@@ -234,7 +478,21 @@ void ofxTextBlock::drawRight(float x, float y){
                 glTranslatef(x, y, 0.0f);
                 glScalef(scale, scale, scale);
 
-                defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                //defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                if (words[currentWordID].hasFormat) {
+                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
+                else {
+                    //ofSetColor(_mainColor);
+                    if (isAnimatedTextEnabled) {
+                        if(currentAlpha.size() > 0)
+                            ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, currentAlpha[currentWordID]);
+                    }else{
+                        ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, _mainColor.a);
+                    }
+                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
+                }
+
                 currX += words[currentWordID].width;
 
                 glPopMatrix();
@@ -244,6 +502,9 @@ void ofxTextBlock::drawRight(float x, float y){
 
         }
     }
+
+    ofPopStyle();
+
 }
 
 void ofxTextBlock::_trimLineSpaces()
@@ -337,7 +598,7 @@ void ofxTextBlock::wrapTextArea(float rWidth, float rHeight){
 }
 
 
-bool ofxTextBlock::wrapTextForceLines(int linesN){
+/*bool ofxTextBlock::wrapTextForceLines(int linesN){
 
     if (words.size() > 0) {
 
@@ -357,13 +618,43 @@ bool ofxTextBlock::wrapTextForceLines(int linesN){
             lineWidth-=10;
 
         }
+    }
+    
+    return false;
 
+}*/
+bool ofxTextBlock::wrapTextForceLines(int linesN) {
+    if (words.size() > 0) {
+        if (linesN > words.size()) {
+            linesN = words.size();
+        }
+
+        float lineWidth = _getWidthOfWords() * (1.1f / (float)linesN);
+
+        int curLines = 0;
+        bool bGotLines = false;
+
+        // Keep increasing the line width until we get the desired number of lines.
+        while (!bGotLines) {
+            curLines = wrapTextX(lineWidth, linesN == 1);
+            if (curLines == linesN) {
+                return true;
+            }
+            if (curLines > linesN) {
+                return false;
+            }
+            lineWidth -= 10;
+        }
     }
 
+    // Add a default return statement outside the if block
+    return false;
 }
 
 
-int ofxTextBlock::wrapTextX(float lineWidth){
+int ofxTextBlock::wrapTextX(float lineWidth, bool skipBreakLine){
+
+    defaultLineWidth = lineWidth;
 
     scale = 1.0f;
 
@@ -373,26 +664,18 @@ int ofxTextBlock::wrapTextX(float lineWidth){
 
         lines.clear();
 
-        bool        newLine = true;
         lineBlock   tmpLine;
         tmpLine.wordsID.clear();
-        int         activeLine = 0;
 
-        for(int i=0;i < words.size(); i++)
+        for (int i = 0; i < words.size(); i++)
         {
 
             runningWidth += words[i].width;
 
-            if (runningWidth <= lineWidth) {
-                newLine = false;
-            }
-            else {
-
-                newLine = true;
+            if (runningWidth > lineWidth || (words[i].isBreakLine && !skipBreakLine)) {
                 lines.push_back(tmpLine);
                 tmpLine.wordsID.clear();
-                runningWidth = 0.0f + words[i].width;;
-                activeLine++;
+                runningWidth = 0.0f + words[i].width;
             }
 
             tmpLine.wordsID.push_back(i);
@@ -408,6 +691,54 @@ int ofxTextBlock::wrapTextX(float lineWidth){
 
 }
 
+#ifdef TWEENZOR_ENABLED
+void ofxTextBlock::enableAnimatedText(bool _val) {
+    /* INIT TWEENEER */
+    Tweenzor::init();
+    isAnimatedTextEnabled = _val;
+}
+
+// Shold be called after setText for one time
+void ofxTextBlock::animateText(float _time, float _delay, float _delayRate, string _type) {
+    // Start Tween
+    if (isAnimatedTextEnabled) {
+        currentAlpha.clear();
+        params.clear();
+        currentAlpha.resize(words.size());
+        params.resize(words.size());
+    }
+
+    for (int i = 0; i < words.size(); i++)
+    {
+        if (isAnimatedTextEnabled) {
+            if(_type == "fadein") {
+                currentAlpha[i] = alphaBegin;
+                // Save alpha params
+                params[i].setup(&currentAlpha[i], alphaBegin, alphaEnd, _delay + log(1+i*0.01) * _delayRate, _time, EASE_OUT_EXPO);
+            }else if(_type == "fadeout") {
+                currentAlpha[i] = alphaEnd;
+                // Save alpha params
+                params[i].setup(&currentAlpha[i], alphaEnd, alphaBegin, _delay + log(1+i*0.01) * _delayRate, _time, EASE_OUT_EXPO);
+                
+            }
+
+            // Start Tween
+            Tweenzor::add(params[i]);
+            Tweenzor::addCompleteListener(Tweenzor::getTween(params[i].property), this, &ofxTextBlock::_onComplete);
+        }
+    }
+}
+
+
+void ofxTextBlock::_onComplete(float * arg)
+{
+    Tweenzor::removeCompleteListener(arg);
+    if( arg == &currentAlpha[words.size() - 1]) {
+        //ofLog()<< arg;
+    }
+}
+#endif
+
 void ofxTextBlock::_loadWords(){
 
     wordBlock tmpWord;
@@ -420,25 +751,38 @@ void ofxTextBlock::_loadWords(){
              back_inserter<vector<string> >(tokens));
 
     words.clear();
-
+    cls.clear();
+    
     for(int i=0;i < tokens.size(); i++)
     {
         tmpWord.rawWord = tokens.at(i);
-        tmpWord.width   = defaultFont.stringWidth(tmpWord.rawWord);
-        tmpWord.height  = defaultFont.stringHeight(tmpWord.rawWord);
-        tmpWord.color.r = tmpWord.color.g = tmpWord.color.b = 150;
+        tmpWord.width = defaultFont.stringWidth(tmpWord.rawWord);
+        tmpWord.height = defaultFont.stringHeight(tmpWord.rawWord);
+        tmpWord.color = _mainColor;
+        tmpWord.hasFormat = false;
+        tmpWord.isBreakLine = false;
         words.push_back(tmpWord);
+        cls.push_back(tmpWord.color);
         //add spaces into the words vector if it is not the last word.
-        if (i != tokens.size()) words.push_back(blankSpaceWord);
+        if (i != tokens.size()) {
+            words.push_back(blankSpaceWord);
+            cls.push_back(blankSpaceWord.color);
+        }
     }
 
+
+    
+    
+    
+   /* cls.push_back(ofColor(255,255));
+    cls.push_back(ofColor(255,255));
+    cls.push_back(ofColor(255,255));*/
     for(int i=0;i < words.size(); i++)
     {
         ofLog(OF_LOG_VERBOSE, "Loaded word: %i, %s\n", i, words[i].rawWord.c_str());
     }
-
-
 }
+
 
 float ofxTextBlock::_getWidthOfWords(){
 
@@ -456,6 +800,15 @@ float ofxTextBlock::_getWidthOfWords(){
         return 0.0f;
     }
 
+}
+
+
+string ofxTextBlock::getAnimType() {
+    return animType;
+}
+
+glm::vec2 ofxTextBlock::getPos() {
+    return pos;
 }
 
 float ofxTextBlock::getWidth(){
@@ -492,6 +845,10 @@ float ofxTextBlock::getHeight(){
 
 }
 
+ofTrueTypeFont & ofxTextBlock::getFont() {
+    return defaultFont;
+}
+
 void ofxTextBlock::setLineHeight(float lineHeight){
 
     defaultFont.setLineHeight(lineHeight);
@@ -506,13 +863,46 @@ void ofxTextBlock::setColor(int r, int g, int b, int a){
     tmpColor.b = b;
     tmpColor.a = a;
 
+    _mainColor = tmpColor;
+
+
     if (words.size() > 0) {
-        for(int i=0;i < words.size(); i++)
+        for (int i = 0; i < words.size(); i++)
         {
-           words[i].color = tmpColor;
+            words[i].color = _mainColor;
+            cls[i] =  _mainColor;
+            if (words[i].hasFormat) {
+                words[i].color.a = _mainColor.a;
+                cls[i].a =  _mainColor.a;
+            }
+            else {
+                words[i].color = _mainColor;
+                cls[i] =  _mainColor;
+            }
+        }
+    }
+}
+
+void ofxTextBlock::setColor(ofColor _color) {
+    _mainColor = _color;
+
+    if (words.size() > 0) {
+        for (int i = 0; i < words.size(); i++)
+        {
+            words[i].color = _mainColor;
+            cls[i] =  _mainColor;
+            if (words[i].hasFormat) {
+                words[i].color.a = _mainColor.a;
+                cls[i].a =  _mainColor.a;
+            }
+            else {
+                words[i].color = _mainColor;
+                cls[i] =  _mainColor;
+            }
 
         }
     }
+
 
 }
 

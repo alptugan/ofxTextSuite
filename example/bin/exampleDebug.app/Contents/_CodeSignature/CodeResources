@@ -8,27 +8,43 @@
 		<data>
 		PK/FgaLxSEW4pVQhtgMTghsTUq4=
 		</data>
+		<key>Resources/of_debug.icns</key>
+		<data>
+		//Yci6OXWARXNENyz2e8h55IzP0=
+		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Frameworks/libfmod.dylib</key>
+		<dict>
+			<key>cdhash</key>
+			<data>
+			AYuBp7PUi8vlAeJzSa6Ja9RfNGs=
+			</data>
+			<key>requirement</key>
+			<string>cdhash H"30a8927be625eff97a95d3ed18f5f89c4443a858" or cdhash H"018b81a7b3d48bcbe501e27349ae896bd45f346b" or cdhash H"b8d9e77c899f5e4aa99edbbf57d4aaaf0acba414" or cdhash H"ca0c9d112cec237bcb28905adfd5a82eefbeaa4d"</string>
+		</dict>
 		<key>Frameworks/libfmodex.dylib</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			Ji55KyJEuyrEBz7Ea+cVLArtHrs=
+			q46IiYjgu8owIwb3TLzX2lLPDzI=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"9f0707993732af6be59d531f00a97b1a0496a655" or cdhash H"262e792b2244bb2ac4073ec46be7152c0aed1ebb" or cdhash H"42b474ff863109132be7fc8602ade09e9c7abb8e" or cdhash H"2a1d7ed412ed78ded7bc1c3f04491ee91dab25b3"</string>
+			<string>cdhash H"0f156bcd9b87d156814c6e780884a794903c013c" or cdhash H"ab8e888988e0bbca302306f74cbcd7da52cf0f32" or cdhash H"d64eec098d61d292fa90d2b20208185f2f1777ac" or cdhash H"d4f409c1e71fe65de77d48032fb3751a755a85fe"</string>
 		</dict>
 		<key>Resources/icon-debug.icns</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			PK/FgaLxSEW4pVQhtgMTghsTUq4=
-			</data>
 			<key>hash2</key>
 			<data>
 			3XSbGmlR3OhU9h6wZodURMhm0Su03tPkfZlW6khxq0g=
+			</data>
+		</dict>
+		<key>Resources/of_debug.icns</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			sBXM6CQpqGZAI35L1c44FMWrLpUL36A7TMKhTuWfrHc=
 			</data>
 		</dict>
 	</dict>

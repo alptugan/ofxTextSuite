@@ -3,11 +3,18 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-    myText.init("frabk.ttf", 80);
-    myText.setText("Welcome. L is for Left, while R is for Right. Center it up with C, or hit J to Justify.  Press 1 to wrap constrained on x, or 2 to fit type to the area.");
-
+    textBlock.init("frabk.ttf", 12);
+    textBlock.setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+    
+    // Set textBlock width
+    textBlockWidth = ofGetWidth() - 40;
+    
+    // Set position
+    posX = 20;
+    posY = 20;
+    
     //Initially wrap the text to the screen width
-    myText.wrapTextX(ofGetWidth());
+    textBlock.wrapTextX(textBlockWidth);
 
 }
 
@@ -18,25 +25,37 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+    ofBackground(0x1111111);
     switch (alignment) {
 
         case OF_TEXT_ALIGN_LEFT:
-            myText.draw(0,0);
+            textBlock.draw(posX, posY);
             break;
         case OF_TEXT_ALIGN_RIGHT:
-            myText.drawRight(ofGetWidth(), 0);
+            textBlock.drawRight(posX, posY);
             break;
         case OF_TEXT_ALIGN_CENTER:
-            myText.drawCenter(ofGetWidth()/2,0);
+            textBlock.drawCenter(posX, posY);
             break;
         case OF_TEXT_ALIGN_JUSTIFIED:
-            myText.drawJustified(0, 0, myText.getWidth());
+            textBlock.drawJustified(0, 0, textBlock.getWidth());
             break;
 
     }
-
-
+    
+    
+    // Draw bounding box for the textblock  
+    
+    
+    // Alignment Options
+    stringstream str;
+    str << "Hit `1` to set random width for the textBlock" << endl;
+    str << "Hit `2` to set full width and height for the textBlock" << endl;
+    str << "Hit `l` to set the alignment LEFT for the textBlock" << endl;
+    str << "Hit `r` to set the alignment RIGHT for the textBlock" << endl;
+    str << "Hit `c` to set the alignment CENTER for the textBlock" << endl;
+    str << "Hit `j` to set the alignment JUSTIFIED for the textBlock" << endl;
+    ofDrawBitmapStringHighlight(str.str(), posX, ofGetHeight() - 100);
 }
 
 //--------------------------------------------------------------
@@ -46,10 +65,10 @@ void ofApp::keyPressed(int key){
 
 
         case '1':
-            myText.wrapTextX(ofGetWidth());
+            textBlock.wrapTextX(ofRandom(100, ofGetWidth() - 40));
             break;
         case '2':
-            myText.wrapTextArea(ofGetWidth(), ofGetHeight());
+            textBlock.wrapTextArea(ofGetWidth() - 100, ofGetHeight() - 200);
             break;
         case 'l':
             alignment = OF_TEXT_ALIGN_LEFT;
@@ -62,10 +81,7 @@ void ofApp::keyPressed(int key){
             break;
         case 'j':
             alignment = OF_TEXT_ALIGN_JUSTIFIED;
-
             break;
-
-
     }
 
 }
@@ -96,7 +112,28 @@ void ofApp::mouseReleased(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
+void ofApp::mouseEntered(int x, int y){
+
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseExited(int x, int y){
+
+}
+
+//--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
 
 }
+
+//--------------------------------------------------------------
+void ofApp::gotMessage(ofMessage msg){
+
+}
+
+//--------------------------------------------------------------
+void ofApp::dragEvent(ofDragInfo dragInfo){
+
+}
+
 

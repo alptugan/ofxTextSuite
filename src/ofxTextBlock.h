@@ -21,6 +21,9 @@
 #define OFXTEXTBLOCK_H
 
 #include "ofMain.h"
+#ifdef TWEENZOR_ENABLED
+#include "ofxTweenzor.h"
+#endif
 #include <iterator>
 
 class wordBlock {
@@ -29,7 +32,19 @@ class wordBlock {
         float           width;
         float           height;
         ofColor         color;
+    int r,g,b,a;
+        ofTrueTypeFont  defaultFont;
+        bool            hasFormat;
+        bool            isBreakLine;
 
+        void setFont(string fontLocation, float fontSize, bool antiAliased) {
+            hasFormat = true;
+
+            defaultFont.load(fontLocation, fontSize, antiAliased, true);
+
+            width = defaultFont.stringWidth(rawWord);
+            height = defaultFont.stringHeight(rawWord);
+        }
 };
 
 
@@ -42,33 +57,59 @@ class lineBlock {
 
 };
 
+class textFormat {
+public:
+    string    tagOpened="";
+    string    tagClosed="";
+    string    font = "";
+    int        size=0;
+    ofColor    color;
+    bool antiAliesed=true;
+};
+
 //Just a helpful set of enumerated constants.
 enum TextBlockAlignment { OF_TEXT_ALIGN_LEFT, OF_TEXT_ALIGN_RIGHT, OF_TEXT_ALIGN_JUSTIFIED, OF_TEXT_ALIGN_CENTER };
 
 class ofxTextBlock
 {
     public:
+        
         ofxTextBlock();
         virtual ~ofxTextBlock();
+#ifdef TWEENZOR_ENABLED
+        void enableAnimatedText(bool _val = true);
+        void animateText(float time = 1.0, float _delay = 0.0, float _delayRate = 0.2, string _type = "fadein");
+#endif
+        vector<float> currentAlpha;
+#ifdef TWEENZOR_ENABLED
+        vector<TweenParams> params;
+#endif
 
         string          rawText;
         ofTrueTypeFont  defaultFont;
         wordBlock       blankSpaceWord;
         float           scale;
-
+        int                defaultLineWidth;
         vector<wordBlock>   words;
         vector<lineBlock>   lines;
+        vector<textFormat>  formats;
 
-        void    init(string fontLocation, float fontSize);
+
+        void    init(string fontLocation, float fontSize, bool antiAliased = true);
+        void    init( ofTrueTypeFont *_f, bool antiAliased = true);
 
         void    setText(string _inputText);
+        void    setHtmlText(string _inputText);
+        void    setFormat(textFormat format);
 
-        int     wrapTextX(float lineWidth);                 //Returns the number of lines it formed.
+
+        int     wrapTextX(float lineWidth, bool skipBreakLine = false);                 //Returns the number of lines it formed.
         void    wrapTextArea(float rWidth, float rHeight);
         bool    wrapTextForceLines(int linesN);
 
         void    setLineHeight(float lineHeight);
         void    setColor(int r, int g, int b, int a);
+        void    setColor(ofColor _color);
 
         void    draw(float x, float y);                    //Draws left align.
         void    drawLeft(float x, float y);
@@ -81,7 +122,10 @@ class ofxTextBlock
 
         float   getWidth();
         float   getHeight();
-
+        glm::vec2 getPos();
+        string getAnimType();
+    ofTrueTypeFont & getFont();
+    ofColor _mainColor;
     protected:
 
         void    _loadWords();
@@ -89,8 +133,17 @@ class ofxTextBlock
         void    _trimLineSpaces();
         float   _getWidthOfWords();
         int     _getLinedWords();
-
+#ifdef TWEENZOR_ENABLED
+        void    _onComplete(float* arg);
+#endif
+    
     private:
+        bool isAnimatedTextEnabled;
+        float alphaBegin, alphaEnd;
+        
+        string animType;
+        glm::vec2 pos;
+        vector<ofColor> cls;
 };
 
 #endif // OFXTEXTBLOCK_H
