@@ -15,7 +15,6 @@ void ofApp::setup(){
     
     //Initially wrap the text to the screen width
     textBlock.wrapTextX(textBlockWidth);
-
 }
 
 //--------------------------------------------------------------
@@ -38,14 +37,19 @@ void ofApp::draw(){
             textBlock.drawCenter(posX, posY);
             break;
         case OF_TEXT_ALIGN_JUSTIFIED:
-            textBlock.drawJustified(0, 0, textBlock.getWidth());
+            textBlock.drawJustified(0, 0, ofGetWidth() - 40);
             break;
 
     }
-    
-    
-    // Draw bounding box for the textblock  
-    
+        
+    // Draw bounding box for the textblock
+    // NEEDS to be fixed ....
+    /*boundingBox = ofRectangle(textBlock.getPos().y, textBlock.getPos().x, textBlock.getWidth(), textBlock.getHeight());
+    ofPushStyle();
+    ofNoFill();
+    ofSetHexColor(0xee0000);
+    ofDrawRectangle(boundingBox);
+    ofPopStyle();*/
     
     // Alignment Options
     stringstream str;
@@ -71,12 +75,15 @@ void ofApp::keyPressed(int key){
             textBlock.wrapTextArea(ofGetWidth() - 100, ofGetHeight() - 200);
             break;
         case 'l':
+            posX = 20;
             alignment = OF_TEXT_ALIGN_LEFT;
             break;
         case 'r':
+            posX = ofGetWidth() - posX;
             alignment = OF_TEXT_ALIGN_RIGHT;
             break;
         case 'c':
+            posX = ofGetWidth() * 0.5;
             alignment = OF_TEXT_ALIGN_CENTER;
             break;
         case 'j':

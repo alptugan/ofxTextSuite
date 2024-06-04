@@ -48,8 +48,8 @@ void ofxTextBlock::init(string fontLocation, float fontSize, bool antiAliased){
 
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
-    blankSpaceWord.width   = defaultFont.stringWidth ("x");
-    blankSpaceWord.height  = defaultFont.stringHeight("i");
+    blankSpaceWord.width   = defaultFont.stringWidth ("w");
+    blankSpaceWord.height  = defaultFont.stringHeight("ipg");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
 
     blankSpaceWord.hasFormat = false;
@@ -64,8 +64,8 @@ void ofxTextBlock::init(ofTrueTypeFont * _f, bool antiAliased) {
 
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
-    blankSpaceWord.width = defaultFont.stringWidth("x");
-    blankSpaceWord.height = defaultFont.stringHeight("i");
+    blankSpaceWord.width = defaultFont.stringWidth("w");
+    blankSpaceWord.height = defaultFont.stringHeight("ipg");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
 
     blankSpaceWord.hasFormat = false;
@@ -207,6 +207,8 @@ void ofxTextBlock::drawLeft(float x, float y){
                 currentWordID = lines[l].wordsID[w];
 
                 drawX = x + currX;
+                // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
+                //drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.5);
                 drawY = y + (defaultFont.getLineHeight() * (l + 1));
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
@@ -221,9 +223,9 @@ void ofxTextBlock::drawLeft(float x, float y){
 
                 }
                 
-                glPushMatrix();
+                ofPushMatrix();
                 //glTranslatef(drawX, drawY, 0.0f);
-                glScalef(scale, scale, scale);
+                ofScale(scale, scale, scale);
 
                 if (words[currentWordID].hasFormat) {
                     words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
@@ -242,7 +244,7 @@ void ofxTextBlock::drawLeft(float x, float y){
                 //defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 currX += words[currentWordID].width;
 
-                glPopMatrix();
+                ofPopMatrix();
 
             }
             currX = 0;

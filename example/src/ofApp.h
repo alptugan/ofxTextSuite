@@ -27,5 +27,7 @@ class ofApp : public ofBaseApp{
         int                 textBlockWidth, posX, posY;
 		ofxTextBlock        textBlock;
 		TextBlockAlignment  alignment;  //constants for controlling state
+    
+    ofRectangle boundingBox;
 
 };
