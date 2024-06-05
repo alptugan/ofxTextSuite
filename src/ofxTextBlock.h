@@ -20,10 +20,12 @@
 #ifndef OFXTEXTBLOCK_H
 #define OFXTEXTBLOCK_H
 
-#include "ofMain.h"
+#define TWEENZOR_ENABLED
 #ifdef TWEENZOR_ENABLED
 #include "ofxTweenzor.h"
 #endif
+
+#include "ofMain.h"
 #include <iterator>
 
 class wordBlock {
@@ -76,15 +78,13 @@ class ofxTextBlock
         
         ofxTextBlock();
         virtual ~ofxTextBlock();
-#ifdef TWEENZOR_ENABLED
+        void updateTweenzor();
+//#ifdef TWEENZOR_ENABLED
         void enableAnimatedText(bool _val = true);
         void animateText(float time = 1.0, float _delay = 0.0, float _delayRate = 0.2, string _type = "fadein");
-#endif
-        vector<float> currentAlpha;
-#ifdef TWEENZOR_ENABLED
         vector<TweenParams> params;
-#endif
-
+//#endif
+        vector<float> currentAlpha;
         string          rawText;
         ofTrueTypeFont  defaultFont;
         wordBlock       blankSpaceWord;
@@ -124,23 +124,24 @@ class ofxTextBlock
         float   getHeight();
         glm::vec2 getPos();
         string getAnimType();
-    ofTrueTypeFont & getFont();
-    ofColor _mainColor;
+        ofTrueTypeFont & getFont();
+        ofColor _mainColor;
+        ofRectangle getBoundingBox();
     protected:
-
         void    _loadWords();
-
         void    _trimLineSpaces();
         float   _getWidthOfWords();
         int     _getLinedWords();
-#ifdef TWEENZOR_ENABLED
+//#ifdef TWEENZOR_ENABLED
         void    _onComplete(float* arg);
-#endif
+        
+//#endif
     
     private:
         bool isAnimatedTextEnabled;
-        float alphaBegin, alphaEnd;
-        
+        float alphaBegin;
+        float alphaEnd;
+        int alignmentShiftX;
         string animType;
         glm::vec2 pos;
         vector<ofColor> cls;

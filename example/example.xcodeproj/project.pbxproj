@@ -3,6 +3,42 @@
 	"classes": {},
 	"objectVersion": "54",
 	"objects": {
+		"04219996-BC00-42B0-BCB2-42B0FFD00CDF": {
+			"explicitFileType": "sourcecode.c.h",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "ofxTextBlock.h",
+			"path": "../../../addons/ofxTextSuite/src/ofxTextBlock.h",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"0B01E014-B95F-4008-87AF-EC66F01BB1CB": {
+			"fileRef": "7048AA0A-6ECF-42A5-916A-28EAD81B0D20",
+			"isa": "PBXBuildFile"
+		},
+		"10248036-ECC3-4D3A-9402-A3505EFD1D40": {
+			"explicitFileType": "sourcecode.cpp.cpp",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "Tween.cpp",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/Tween.cpp",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"1070A838-81C7-425B-9C43-48F112C586EB": {
+			"explicitFileType": "sourcecode.c.h",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "Tweenzor.h",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/Tweenzor.h",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"10C42F93-6EB0-4B57-AEFA-4F248A3E7719": {
+			"explicitFileType": "sourcecode.cpp.cpp",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "ofxTextBlock.cpp",
+			"path": "../../../addons/ofxTextSuite/src/ofxTextBlock.cpp",
+			"sourceTree": "SOURCE_ROOT"
+		},
 		"191CD6FA2847E21E0085CBB6": {
 			"fileEncoding": "4",
 			"isa": "PBXFileReference",
@@ -30,24 +66,43 @@
 			"shellScript": "\"$OF_PATH/scripts/osx/xcode_project.sh\"\n",
 			"showEnvVarsInLog": "0"
 		},
-		"2BAC643B-6A36-4A7A-9058-2B3365B708EC": {
-			"children": [
-				"F1D338AF-B944-448D-A8DF-2C9F680CAAFF"
-			],
-			"isa": "PBXGroup",
-			"name": "ofxTextSuite",
-			"path": "../../../addons/ofxTextSuite",
-			"sourceTree": "SOURCE_ROOT"
-		},
-		"724A5EBF-1243-40E3-A43C-EE1F4931223E": {
+		"1D8C2C4D-4E6A-4FDA-984E-64ECAF35CA76": {
 			"explicitFileType": "sourcecode.c.h",
 			"fileEncoding": "4",
 			"isa": "PBXFileReference",
-			"name": "ofxTextBlock.h",
-			"path": "../../../addons/ofxTextSuite/src/ofxTextBlock.h",
+			"name": "TweenSelector.h",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/TweenSelector.h",
 			"sourceTree": "SOURCE_ROOT"
 		},
-		"79CBD445-1C9F-4248-A2ED-1B6F6F448F01": {
+		"4060A160-151B-486A-B76B-AB0B66C3C770": {
+			"explicitFileType": "sourcecode.c.h",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "TweenEvent.h",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/TweenEvent.h",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"5BFC8387-4538-4B85-9A89-622F22B31703": {
+			"fileRef": "10248036-ECC3-4D3A-9402-A3505EFD1D40",
+			"isa": "PBXBuildFile"
+		},
+		"5E1F2E0F-0894-4C6E-A4FF-6554FAA5BCD8": {
+			"children": [
+				"10248036-ECC3-4D3A-9402-A3505EFD1D40",
+				"B24A3410-6D7D-4CDB-86FB-BABCAA150BD1",
+				"4060A160-151B-486A-B76B-AB0B66C3C770",
+				"D8A0BD3C-0CD8-4068-8A10-DA6250BDB84F",
+				"1D8C2C4D-4E6A-4FDA-984E-64ECAF35CA76",
+				"7048AA0A-6ECF-42A5-916A-28EAD81B0D20",
+				"1070A838-81C7-425B-9C43-48F112C586EB",
+				"C9C57ACD-048F-4A17-86DC-DEF008808220"
+			],
+			"isa": "PBXGroup",
+			"name": "include",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"63FA2537-C19A-4901-8B6A-4267EC7C2190": {
 			"explicitFileType": "sourcecode.c.h",
 			"fileEncoding": "4",
 			"isa": "PBXFileReference",
@@ -55,21 +110,88 @@
 			"path": "../../../addons/ofxTextSuite/src/ofxTextSuite.h",
 			"sourceTree": "SOURCE_ROOT"
 		},
+		"7048AA0A-6ECF-42A5-916A-28EAD81B0D20": {
+			"explicitFileType": "sourcecode.cpp.cpp",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "Tweenzor.cpp",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/Tweenzor.cpp",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"77F9B84F-D8BA-401A-AE62-510CB8FD2C52": {
+			"children": [
+				"5E1F2E0F-0894-4C6E-A4FF-6554FAA5BCD8"
+			],
+			"isa": "PBXGroup",
+			"name": "ofxTweenzor",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"98204A3C-3882-4627-8A6F-CD56B5EDC657": {
+			"children": [
+				"10C42F93-6EB0-4B57-AEFA-4F248A3E7719",
+				"04219996-BC00-42B0-BCB2-42B0FFD00CDF",
+				"63FA2537-C19A-4901-8B6A-4267EC7C2190"
+			],
+			"isa": "PBXGroup",
+			"name": "src",
+			"path": "../../../addons/ofxTextSuite/src",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"9D1830E2-5F31-4662-B2EC-4BC3689D65E3": {
+			"children": [
+				"77F9B84F-D8BA-401A-AE62-510CB8FD2C52"
+			],
+			"isa": "PBXGroup",
+			"name": "libs",
+			"path": "../../../addons/ofxTextSuite/libs",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"A8A21DF6-6AD3-4006-83E2-BC401AD914A6": {
+			"children": [
+				"9D1830E2-5F31-4662-B2EC-4BC3689D65E3",
+				"98204A3C-3882-4627-8A6F-CD56B5EDC657"
+			],
+			"isa": "PBXGroup",
+			"name": "ofxTextSuite",
+			"path": "../../../addons/ofxTextSuite",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"B24A3410-6D7D-4CDB-86FB-BABCAA150BD1": {
+			"explicitFileType": "sourcecode.c.h",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "Tween.h",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/Tween.h",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"B5669D71-FE69-436E-ADD2-743E83C0626C": {
+			"fileRef": "10C42F93-6EB0-4B57-AEFA-4F248A3E7719",
+			"isa": "PBXBuildFile"
+		},
 		"BB4B014C10F69532006C3DED": {
 			"children": [
-				"2BAC643B-6A36-4A7A-9058-2B3365B708EC"
+				"A8A21DF6-6AD3-4006-83E2-BC401AD914A6"
 			],
 			"isa": "PBXGroup",
 			"name": "addons",
 			"path": "../../../addons",
 			"sourceTree": "<group>"
 		},
-		"DB4BC60F-36B5-4BE5-8695-01AD1A9D9BA0": {
-			"explicitFileType": "sourcecode.cpp.cpp",
+		"C9C57ACD-048F-4A17-86DC-DEF008808220": {
+			"explicitFileType": "sourcecode.c.h",
 			"fileEncoding": "4",
 			"isa": "PBXFileReference",
-			"name": "ofxTextBlock.cpp",
-			"path": "../../../addons/ofxTextSuite/src/ofxTextBlock.cpp",
+			"name": "ofxTweenzor.h",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/ofxTweenzor.h",
+			"sourceTree": "SOURCE_ROOT"
+		},
+		"D8A0BD3C-0CD8-4068-8A10-DA6250BDB84F": {
+			"explicitFileType": "sourcecode.c.h",
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"name": "TweenFunctions.h",
+			"path": "../../../addons/ofxTextSuite/libs/ofxTweenzor/include/TweenFunctions.h",
 			"sourceTree": "SOURCE_ROOT"
 		},
 		"E42962A92163ECCD00A6A9E2": {
@@ -174,7 +296,9 @@
 			"files": [
 				"E4B69E200A3A1BDC003C02F2",
 				"E4B69E210A3A1BDC003C02F2",
-				"ED64DFD4-54B1-478B-ADBC-3A839D1B8257"
+				"5BFC8387-4538-4B85-9A89-622F22B31703",
+				"0B01E014-B95F-4008-87AF-EC66F01BB1CB",
+				"B5669D71-FE69-436E-ADD2-743E83C0626C"
 			],
 			"isa": "PBXSourcesBuildPhase",
 			"runOnlyForDeploymentPostprocessing": "0"
@@ -230,6 +354,9 @@
 					"$(OF_CORE_HEADERS)",
 					"src",
 					"src",
+					"../../../addons/ofxTextSuite/libs",
+					"../../../addons/ofxTextSuite/libs/ofxTweenzor",
+					"../../../addons/ofxTextSuite/libs/ofxTweenzor/include",
 					"../../../addons/ofxTextSuite/src"
 				],
 				"LIBRARY_SEARCH_PATHS": "$(inherited)",
@@ -252,6 +379,9 @@
 					"$(OF_CORE_HEADERS)",
 					"src",
 					"src",
+					"../../../addons/ofxTextSuite/libs",
+					"../../../addons/ofxTextSuite/libs/ofxTweenzor",
+					"../../../addons/ofxTextSuite/libs/ofxTweenzor/include",
 					"../../../addons/ofxTextSuite/src"
 				],
 				"LIBRARY_SEARCH_PATHS": "$(inherited)",
@@ -328,21 +458,6 @@
 			"lastKnownFileType": "text.xcconfig",
 			"path": "Project.xcconfig",
 			"sourceTree": "<group>"
-		},
-		"ED64DFD4-54B1-478B-ADBC-3A839D1B8257": {
-			"fileRef": "DB4BC60F-36B5-4BE5-8695-01AD1A9D9BA0",
-			"isa": "PBXBuildFile"
-		},
-		"F1D338AF-B944-448D-A8DF-2C9F680CAAFF": {
-			"children": [
-				"DB4BC60F-36B5-4BE5-8695-01AD1A9D9BA0",
-				"724A5EBF-1243-40E3-A43C-EE1F4931223E",
-				"79CBD445-1C9F-4248-A2ED-1B6F6F448F01"
-			],
-			"isa": "PBXGroup",
-			"name": "src",
-			"path": "../../../addons/ofxTextSuite/src",
-			"sourceTree": "SOURCE_ROOT"
 		}
 	},
 	"openFrameworksProjectGeneratorVersion": "21",

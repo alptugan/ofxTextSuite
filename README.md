@@ -2,6 +2,9 @@
 
 ofxTextSuite is an openFrameworks addon aims to ease the process of text creation and manipulation. 
 
+> [!IMPORTANT]  
+> The addon is still work in progress. I will add more examples showcasing new features.
+
 # Features
 - Fit text into a specific width and height area.
 - Set the text alignment left, right, center, and justified.

@@ -37,19 +37,19 @@ void ofApp::draw(){
             textBlock.drawCenter(posX, posY);
             break;
         case OF_TEXT_ALIGN_JUSTIFIED:
-            textBlock.drawJustified(0, 0, ofGetWidth() - 40);
+            textBlock.drawJustified(posX, posY, ofGetWidth() - 40);
             break;
 
     }
         
-    // Draw bounding box for the textblock
-    // NEEDS to be fixed ....
-    /*boundingBox = ofRectangle(textBlock.getPos().y, textBlock.getPos().x, textBlock.getWidth(), textBlock.getHeight());
+    // Bounding box for showing how origin point changes according to the ALIGNMENT
+    boundingBox = ofRectangle(textBlock.getPos().x, textBlock.getPos().y, textBlock.getWidth(), textBlock.getHeight());
     ofPushStyle();
     ofNoFill();
     ofSetHexColor(0xee0000);
-    ofDrawRectangle(boundingBox);
-    ofPopStyle();*/
+    ofDrawRectangle(textBlock.getBoundingBox());
+    ofPopStyle();
+    
     
     // Alignment Options
     stringstream str;
@@ -66,8 +66,6 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 
     switch (key) {
-
-
         case '1':
             textBlock.wrapTextX(ofRandom(100, ofGetWidth() - 40));
             break;
@@ -76,17 +74,22 @@ void ofApp::keyPressed(int key){
             break;
         case 'l':
             posX = 20;
+            posY = 20;
             alignment = OF_TEXT_ALIGN_LEFT;
             break;
         case 'r':
-            posX = ofGetWidth() - posX;
+            posX = ofGetWidth() - 20;
+            posY = 20;
             alignment = OF_TEXT_ALIGN_RIGHT;
             break;
         case 'c':
-            posX = ofGetWidth() * 0.5;
             alignment = OF_TEXT_ALIGN_CENTER;
+            posX = ofGetWidth() * 0.5;
+            posY = 20;
             break;
         case 'j':
+            posX = 20;
+            posY = 20;
             alignment = OF_TEXT_ALIGN_JUSTIFIED;
             break;
     }

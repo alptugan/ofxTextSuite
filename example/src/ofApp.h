@@ -3,8 +3,6 @@
 #include "ofMain.h"
 #include "ofxTextSuite.h"
 
-//#define TWEENZOR_ENABLED
-
 class ofApp : public ofBaseApp{
 
 	public:

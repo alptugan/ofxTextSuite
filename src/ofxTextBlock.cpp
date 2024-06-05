@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  ***********************************************************************/
-
 #include "ofxTextBlock.h"
 
 ofxTextBlock::ofxTextBlock()
@@ -27,19 +26,13 @@ ofxTextBlock::ofxTextBlock()
     scale       = 1.0f;
     animType    = "fadein";
     _mainColor  = ofColor(255);
+    alignmentShiftX = 0;
 
 }
 
 ofxTextBlock::~ofxTextBlock()
 {
-    //dtor
-#ifdef TWEENZOR_ENABLED
-    if (isAnimatedTextEnabled) {
-        //Tweenzor::removeAllListeners();
-        //Tweenzor::destroy();
-        
-    }
-#endif
+
 }
 
 void ofxTextBlock::init(string fontLocation, float fontSize, bool antiAliased){
@@ -48,10 +41,9 @@ void ofxTextBlock::init(string fontLocation, float fontSize, bool antiAliased){
 
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
-    blankSpaceWord.width   = defaultFont.stringWidth ("w");
-    blankSpaceWord.height  = defaultFont.stringHeight("ipg");
+    blankSpaceWord.width   = defaultFont.stringWidth ("x");
+    blankSpaceWord.height  = defaultFont.stringHeight("ig");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
-
     blankSpaceWord.hasFormat = false;
     blankSpaceWord.isBreakLine = false;
     
@@ -64,8 +56,8 @@ void ofxTextBlock::init(ofTrueTypeFont * _f, bool antiAliased) {
 
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
-    blankSpaceWord.width = defaultFont.stringWidth("w");
-    blankSpaceWord.height = defaultFont.stringHeight("ipg");
+    blankSpaceWord.width = defaultFont.stringWidth("x");
+    blankSpaceWord.height = defaultFont.stringHeight("ig");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
 
     blankSpaceWord.hasFormat = false;
@@ -168,14 +160,20 @@ void ofxTextBlock::setText(string _inputText){
     wrapTextForceLines(1);
 }
 
-void ofxTextBlock::draw(float x, float y){
-    
-    pos.x = x;
-    pos.y = y;
+void ofxTextBlock::updateTweenzor() {
 #ifdef TWEENZOR_ENABLED
     if(isAnimatedTextEnabled)
         Tweenzor::update(ofGetElapsedTimeMillis());
 #endif
+}
+
+void ofxTextBlock::draw(float x, float y){
+    
+    pos.x = x;
+    pos.y = y;
+
+    updateTweenzor();
+
     drawLeft(x, y);
 
 }
@@ -185,10 +183,8 @@ void ofxTextBlock::drawLeft(float x, float y){
     pos.x = x;
     pos.y = y;
     ofPushStyle();
-#ifdef TWEENZOR_ENABLED
-    if (isAnimatedTextEnabled)
-        Tweenzor::update(ofGetElapsedTimeMillis());
-#endif
+
+    updateTweenzor();
     
     
     string  strToDraw;
@@ -208,8 +204,8 @@ void ofxTextBlock::drawLeft(float x, float y){
 
                 drawX = x + currX;
                 // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
-                //drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.5);
-                drawY = y + (defaultFont.getLineHeight() * (l + 1));
+                drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
+                //drawY = y + (defaultFont.getLineHeight() * (l + 1));
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 if (isAnimatedTextEnabled) {
@@ -252,23 +248,23 @@ void ofxTextBlock::drawLeft(float x, float y){
         }
     }
     ofPopStyle();
+    
+    alignmentShiftX = 0;
 }
 
 void ofxTextBlock::drawCenter(float x, float y){
     
     pos.x = x;
     pos.y = y;
-#ifdef TWEENZOR_ENABLED
-    if (isAnimatedTextEnabled)
-        Tweenzor::update(ofGetElapsedTimeMillis());
-#endif
+
+    updateTweenzor();
+    
     ofPushStyle();
     string  strToDraw;
-    int     currentWordID;
-    float   drawX;
-    float   drawY;
-    float   lineWidth;
-
+    int     currentWordID = 0;
+    float   drawX = 0;
+    float   drawY = 0;
+    float   lineWidth = 0;
     float currX = 0;
 
     if (words.size() > 0) {
@@ -288,8 +284,11 @@ void ofxTextBlock::drawCenter(float x, float y){
             {
                 currentWordID = lines[l].wordsID[w];
 
-                drawX = -(lineWidth / 2) + currX;
-                drawY = defaultFont.getLineHeight() * (l + 1);
+                drawX = x -(lineWidth / 2) + currX;
+                //drawX = x + currX;
+                //drawY = defaultFont.getLineHeight() * (l + 1);
+                // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
+                drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
 
                 if (isAnimatedTextEnabled) {
                     if(currentAlpha.size() > 0)
@@ -301,12 +300,12 @@ void ofxTextBlock::drawCenter(float x, float y){
                     ofSetColor(cls[currentWordID].r, cls[currentWordID].g, cls[currentWordID].b, cls[currentWordID].a);
 
                 }
-                glPushMatrix();
+                ofPushMatrix();
 
                 //Move to central point using pre-scaled co-ordinates
-                glTranslatef(x, y, 0.0f);
+                //glTranslatef(x, y, 0.0f);
 
-                glScalef(scale, scale, scale);
+                ofScale(scale, scale, scale);
 
                 if (words[currentWordID].hasFormat) {
                     words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), floor(drawX), floor(drawY));
@@ -324,7 +323,7 @@ void ofxTextBlock::drawCenter(float x, float y){
                 //defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 currX += words[currentWordID].width;
 
-                glPopMatrix();
+                ofPopMatrix();
 
             }
             currX = 0;
@@ -333,16 +332,16 @@ void ofxTextBlock::drawCenter(float x, float y){
     }
     ofPopStyle();
     
+    alignmentShiftX = getWidth()*0.5;
 }
 
 void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     
     pos.x = x;
     pos.y = y;
-#ifdef TWEENZOR_ENABLED
-    if (isAnimatedTextEnabled)
-        Tweenzor::update(ofGetElapsedTimeMillis());
-#endif
+
+    updateTweenzor();
+    
     ofPushStyle();
     string  strToDraw;
     int     currentWordID;
@@ -382,7 +381,9 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 currentWordID = lines[l].wordsID[w];
 
                 drawX = currX;
-                drawY = defaultFont.getLineHeight() * (l + 1);
+                //drawY = defaultFont.getLineHeight() * (l + 1);
+                // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
+                drawY = (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 if (isAnimatedTextEnabled) {
@@ -430,17 +431,17 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
         }
     }
     ofPopStyle();
-
+    
+    alignmentShiftX = 0;
 }
 
 void ofxTextBlock::drawRight(float x, float y){
     
     pos.x = x;
     pos.y = y;
-#ifdef TWEENZOR_ENABLED
-    if (isAnimatedTextEnabled)
-        Tweenzor::update(ofGetElapsedTimeMillis());
-#endif
+
+    updateTweenzor();
+    
     ofPushStyle();
     string  strToDraw;
     int     currentWordID;
@@ -460,7 +461,9 @@ void ofxTextBlock::drawRight(float x, float y){
                 currentWordID = lines[l].wordsID[w];
 
                 drawX = -currX - words[currentWordID].width;
-                drawY = defaultFont.getLineHeight() * (l + 1);
+                //drawY = defaultFont.getLineHeight() * (l + 1);
+                // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
+                drawY = (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 if (isAnimatedTextEnabled) {
@@ -506,6 +509,8 @@ void ofxTextBlock::drawRight(float x, float y){
     }
 
     ofPopStyle();
+    
+    alignmentShiftX = getWidth();
 
 }
 
@@ -599,32 +604,6 @@ void ofxTextBlock::wrapTextArea(float rWidth, float rHeight){
 
 }
 
-
-/*bool ofxTextBlock::wrapTextForceLines(int linesN){
-
-    if (words.size() > 0) {
-
-        if (linesN > words.size()) linesN = words.size();
-
-        float lineWidth = _getWidthOfWords() * (1.1f / (float)linesN);
-
-        int curLines = 0;
-        bool bGotLines = false;
-
-        //keep increasing the line width until we get the desired number of lines.
-        while (!bGotLines) {
-
-            curLines = wrapTextX(lineWidth);
-            if (curLines == linesN) return true;
-            if (curLines > linesN) return false;
-            lineWidth-=10;
-
-        }
-    }
-    
-    return false;
-
-}*/
 bool ofxTextBlock::wrapTextForceLines(int linesN) {
     if (words.size() > 0) {
         if (linesN > words.size()) {
@@ -693,7 +672,7 @@ int ofxTextBlock::wrapTextX(float lineWidth, bool skipBreakLine){
 
 }
 
-#ifdef TWEENZOR_ENABLED
+//#ifdef TWEENZOR_ENABLED
 void ofxTextBlock::enableAnimatedText(bool _val) {
     /* INIT TWEENEER */
     Tweenzor::init();
@@ -739,7 +718,7 @@ void ofxTextBlock::_onComplete(float * arg)
         //ofLog()<< arg;
     }
 }
-#endif
+//#endif
 
 void ofxTextBlock::_loadWords(){
 
@@ -906,6 +885,10 @@ void ofxTextBlock::setColor(ofColor _color) {
     }
 
 
+}
+
+ofRectangle ofxTextBlock::getBoundingBox() {
+    return ofRectangle(pos.x - alignmentShiftX, pos.y, getWidth(), getHeight());
 }
 
 void ofxTextBlock::forceScale(float _scale){
