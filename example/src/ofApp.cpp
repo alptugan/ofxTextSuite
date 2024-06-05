@@ -59,7 +59,7 @@ void ofApp::draw(){
     str << "Hit `r` to set the alignment RIGHT for the textBlock" << endl;
     str << "Hit `c` to set the alignment CENTER for the textBlock" << endl;
     str << "Hit `j` to set the alignment JUSTIFIED for the textBlock" << endl;
-    ofDrawBitmapStringHighlight(str.str(), posX, ofGetHeight() - 100);
+    ofDrawBitmapStringHighlight(str.str(), 20, ofGetHeight() - 100);
 }
 
 //--------------------------------------------------------------
