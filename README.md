@@ -3,7 +3,7 @@
 ofxTextSuite is an openFrameworks addon aims to ease the process of text creation and manipulation. 
 
 > [!IMPORTANT]  
-> The addon is still work in progress. I will add more examples showcasing new features.
+> The addon is still work in progress. I will add more examples showcasing new features. 
 
 # Features
 - Fit text into a specific width and height area.
@@ -16,4 +16,9 @@ ofxTextSuite is an openFrameworks addon aims to ease the process of text creatio
 # Background
 This project has been transferred to [Furkan Üzümcü](https://github.com/Furkanzmc) from [Luke Malcolm](https://github.com/lukemalcolm). Furkan transferred the project to me at last. Thanks to contributors, maintainers and creators of the addon.
 
-
+# To do
+- [x] Fix positioning issues when the user set alignment on the fly.
+- [ ] Add fade in/out animated text example.
+- [ ] Add preloaded font example.
+- [ ] Add html-based example to use custom styles via markup tags.
+- [ ] Handle alignment without using draw method. Include the alignment as an argument.
