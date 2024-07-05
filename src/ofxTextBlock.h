@@ -120,13 +120,15 @@ class ofxTextBlock
 
         void    forceScale(float _scale);
 
-        float   getWidth();
-        float   getHeight();
-        glm::vec2 getPos();
-        string getAnimType();
-        ofTrueTypeFont & getFont();
+        float               getWidth();
+        float               getHeight();
+        float               getLineHeight();
+        string              getText();
+        glm::vec2           getPos();
+        string              getAnimType();
+        ofTrueTypeFont &    getFont();
         ofColor _mainColor;
-        ofRectangle getBoundingBox();
+        ofRectangle         getBoundingBox();
     protected:
         void    _loadWords();
         void    _trimLineSpaces();
@@ -142,6 +144,7 @@ class ofxTextBlock
         float alphaBegin;
         float alphaEnd;
         int alignmentShiftX;
+        int alignmentShiftY;
         string animType;
         glm::vec2 pos;
         vector<ofColor> cls;

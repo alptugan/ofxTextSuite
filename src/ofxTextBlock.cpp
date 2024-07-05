@@ -42,11 +42,12 @@ void ofxTextBlock::init(string fontLocation, float fontSize, bool antiAliased){
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
     blankSpaceWord.width   = defaultFont.stringWidth ("x");
-    blankSpaceWord.height  = defaultFont.stringHeight("ig");
+    blankSpaceWord.height  = defaultFont.stringHeight("Öy");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
     blankSpaceWord.hasFormat = false;
     blankSpaceWord.isBreakLine = false;
     
+    alignmentShiftY = blankSpaceWord.height;
 }
 
 void ofxTextBlock::init(ofTrueTypeFont * _f, bool antiAliased) {
@@ -57,11 +58,13 @@ void ofxTextBlock::init(ofTrueTypeFont * _f, bool antiAliased) {
     //Set up the blank space word
     blankSpaceWord.rawWord = " ";
     blankSpaceWord.width = defaultFont.stringWidth("x");
-    blankSpaceWord.height = defaultFont.stringHeight("ig");
+    blankSpaceWord.height = defaultFont.stringHeight("Öy");
     blankSpaceWord.color.r = blankSpaceWord.color.g = blankSpaceWord.color.b = 255;
 
     blankSpaceWord.hasFormat = false;
     blankSpaceWord.isBreakLine = false;
+    
+    alignmentShiftY = blankSpaceWord.height;
     
 }
 void ofxTextBlock::setHtmlText(string _inputText) {
@@ -182,6 +185,7 @@ void ofxTextBlock::drawLeft(float x, float y){
     
     pos.x = x;
     pos.y = y;
+        
     ofPushStyle();
 
     updateTweenzor();
@@ -189,13 +193,18 @@ void ofxTextBlock::drawLeft(float x, float y){
     
     string  strToDraw;
     int     currentWordID;
-    float   drawX;
-    float   drawY;
+    float   drawX = 0;
+    float   drawY = 0;
 
     float currX = 0;
 
     if (words.size() > 0) {
-
+        alignmentShiftY = blankSpaceWord.height * scale;
+        if(scale == 1)
+            y = y + alignmentShiftY;
+        else
+            x = x - scale * blankSpaceWord.width * 0.5;
+        
         for(int l=0;l < lines.size(); l++)
         {
             for(int w=0;w < lines[l].wordsID.size(); w++)
@@ -204,8 +213,9 @@ void ofxTextBlock::drawLeft(float x, float y){
 
                 drawX = x + currX;
                 // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
-                drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
-                //drawY = y + (defaultFont.getLineHeight() * (l + 1));
+                //drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
+                //drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
+                drawY = y + (defaultFont.getLineHeight() * (l));
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 if (isAnimatedTextEnabled) {
@@ -268,10 +278,15 @@ void ofxTextBlock::drawCenter(float x, float y){
     float currX = 0;
 
     if (words.size() > 0) {
-
+        alignmentShiftY = blankSpaceWord.height * scale;
+        
+        if(scale == 1)
+            y = y + alignmentShiftY;
+        else
+            x = x; // There needs to be a fix when wrap into text area is enabled. // ofScale ile çözülebilir.
+        
         for(int l=0;l < lines.size(); l++)
         {
-
             //Get the length of the line.
             lineWidth = 0;
             for(int w=0;w < lines[l].wordsID.size(); w++)
@@ -284,11 +299,9 @@ void ofxTextBlock::drawCenter(float x, float y){
             {
                 currentWordID = lines[l].wordsID[w];
 
-                drawX = x -(lineWidth / 2) + currX;
-                //drawX = x + currX;
-                //drawY = defaultFont.getLineHeight() * (l + 1);
-                // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
-                drawY = y + (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
+                drawX = x + currX - (lineWidth / 2);
+                
+                drawY = y + (defaultFont.getLineHeight() * (l));
 
                 if (isAnimatedTextEnabled) {
                     if(currentAlpha.size() > 0)
@@ -353,8 +366,9 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     float currX = 0;
 
     if (words.size() > 0) {
-
-
+        alignmentShiftY = blankSpaceWord.height * scale;
+        y = y + alignmentShiftY;
+        
         for(int l=0;l < lines.size(); l++)
         {
             //Find number of spaces and width of other words;
@@ -383,7 +397,7 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 drawX = currX;
                 //drawY = defaultFont.getLineHeight() * (l + 1);
                 // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
-                drawY = (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
+                drawY = (defaultFont.getLineHeight() * l);
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 if (isAnimatedTextEnabled) {
@@ -451,7 +465,9 @@ void ofxTextBlock::drawRight(float x, float y){
     float currX = 0;
 
     if (words.size() > 0) {
-
+        alignmentShiftY = blankSpaceWord.height * scale;
+        y = y + alignmentShiftY;
+        
         for(int l=0;l < lines.size(); l++)
         {
 
@@ -463,7 +479,7 @@ void ofxTextBlock::drawRight(float x, float y){
                 drawX = -currX - words[currentWordID].width;
                 //drawY = defaultFont.getLineHeight() * (l + 1);
                 // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
-                drawY = (defaultFont.getLineHeight() * (l + 1)-defaultFont.getSize()*0.4);
+                drawY = (defaultFont.getLineHeight() * (l));
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
                 if (isAnimatedTextEnabled) {
@@ -820,10 +836,23 @@ float ofxTextBlock::getWidth(){
 float ofxTextBlock::getHeight(){
 
     if (words.size() > 0) {
-        return defaultFont.getLineHeight() * scale * lines.size();
+        return (defaultFont.getLineHeight() * scale * (lines.size()-1)) + blankSpaceWord.height*scale + abs(blankSpaceWord.height*scale - defaultFont.getLineHeight() * scale);
     }
     else return 0;
 
+}
+
+float ofxTextBlock::getLineHeight(){
+
+    return defaultFont.getLineHeight();
+}
+
+ofRectangle ofxTextBlock::getBoundingBox() {
+    return ofRectangle(pos.x - alignmentShiftX, pos.y, getWidth(), getHeight());
+}
+
+string ofxTextBlock::getText(){
+    return rawText;
 }
 
 ofTrueTypeFont & ofxTextBlock::getFont() {
@@ -885,10 +914,6 @@ void ofxTextBlock::setColor(ofColor _color) {
     }
 
 
-}
-
-ofRectangle ofxTextBlock::getBoundingBox() {
-    return ofRectangle(pos.x - alignmentShiftX, pos.y, getWidth(), getHeight());
 }
 
 void ofxTextBlock::forceScale(float _scale){

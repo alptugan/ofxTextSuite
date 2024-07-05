@@ -37,7 +37,7 @@ void ofApp::draw(){
             textBlock.drawCenter(posX, posY);
             break;
         case OF_TEXT_ALIGN_JUSTIFIED:
-            textBlock.drawJustified(posX, posY, ofGetWidth() - 40);
+            textBlock.drawJustified(posX, posY, textBlock.getWidth());
             break;
 
     }
@@ -60,6 +60,7 @@ void ofApp::draw(){
     str << "Hit `c` to set the alignment CENTER for the textBlock" << endl;
     str << "Hit `j` to set the alignment JUSTIFIED for the textBlock" << endl;
     ofDrawBitmapStringHighlight(str.str(), 20, ofGetHeight() - 100);
+    
 }
 
 //--------------------------------------------------------------
@@ -70,7 +71,7 @@ void ofApp::keyPressed(int key){
             textBlock.wrapTextX(ofRandom(100, ofGetWidth() - 40));
             break;
         case '2':
-            textBlock.wrapTextArea(ofGetWidth() - 100, ofGetHeight() - 200);
+            textBlock.wrapTextArea(ofGetWidth() - 100, ofGetHeight() - 300);
             break;
         case 'l':
             posX = 20;
@@ -90,6 +91,7 @@ void ofApp::keyPressed(int key){
         case 'j':
             posX = 20;
             posY = 20;
+            int initialW = textBlock.getWidth();
             alignment = OF_TEXT_ALIGN_JUSTIFIED;
             break;
     }
