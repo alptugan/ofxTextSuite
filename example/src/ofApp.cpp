@@ -9,12 +9,15 @@ void ofApp::setup(){
     // Set textBlock width
     textBlockWidth = ofGetWidth() - 40;
     
+    alignment = OF_TEXT_ALIGN_CENTER;
+    
     // Set position
     posX = 20;
     posY = 20;
     
     //Initially wrap the text to the screen width
-    textBlock.wrapTextX(textBlockWidth);
+    //textBlock.wrapTextX(textBlockWidth);
+    textBlock.wrapTextArea(ofGetWidth() - 40, ofGetHeight() - 300);
 }
 
 //--------------------------------------------------------------
@@ -37,7 +40,7 @@ void ofApp::draw(){
             textBlock.drawCenter(posX, posY);
             break;
         case OF_TEXT_ALIGN_JUSTIFIED:
-            textBlock.drawJustified(posX, posY, textBlock.getWidth());
+            textBlock.drawJustified(posX, posY);
             break;
 
     }
@@ -71,27 +74,18 @@ void ofApp::keyPressed(int key){
             textBlock.wrapTextX(ofRandom(100, ofGetWidth() - 40));
             break;
         case '2':
-            textBlock.wrapTextArea(ofGetWidth() - 100, ofGetHeight() - 300);
+            textBlock.wrapTextArea(ofGetWidth() - 40, ofGetHeight() - 300);
             break;
         case 'l':
-            posX = 20;
-            posY = 20;
             alignment = OF_TEXT_ALIGN_LEFT;
             break;
         case 'r':
-            posX = ofGetWidth() - 20;
-            posY = 20;
             alignment = OF_TEXT_ALIGN_RIGHT;
             break;
         case 'c':
             alignment = OF_TEXT_ALIGN_CENTER;
-            posX = ofGetWidth() * 0.5;
-            posY = 20;
             break;
         case 'j':
-            posX = 20;
-            posY = 20;
-            int initialW = textBlock.getWidth();
             alignment = OF_TEXT_ALIGN_JUSTIFIED;
             break;
     }

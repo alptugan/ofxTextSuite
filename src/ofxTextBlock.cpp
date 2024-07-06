@@ -279,12 +279,9 @@ void ofxTextBlock::drawCenter(float x, float y){
 
     if (words.size() > 0) {
         alignmentShiftY = blankSpaceWord.height * scale;
-        
-        if(scale == 1)
-            y = y + alignmentShiftY;
-        else
-            x = x; // There needs to be a fix when wrap into text area is enabled. // ofScale ile çözülebilir.
-        
+        y = y + alignmentShiftY;
+        x = x + getWidth() * 0.5;
+
         for(int l=0;l < lines.size(); l++)
         {
             //Get the length of the line.
@@ -299,9 +296,9 @@ void ofxTextBlock::drawCenter(float x, float y){
             {
                 currentWordID = lines[l].wordsID[w];
 
-                drawX = x + currX - (lineWidth / 2);
-                
-                drawY = y + (defaultFont.getLineHeight() * (l));
+                drawX = currX - (lineWidth / 2);
+                //drawX = x + currX;
+                drawY = (defaultFont.getLineHeight() * (l));
 
                 if (isAnimatedTextEnabled) {
                     if(currentAlpha.size() > 0)
@@ -316,12 +313,12 @@ void ofxTextBlock::drawCenter(float x, float y){
                 ofPushMatrix();
 
                 //Move to central point using pre-scaled co-ordinates
-                //glTranslatef(x, y, 0.0f);
+                ofTranslate(x, y);
 
-                ofScale(scale, scale, scale);
+                ofScale(scale, scale);
 
                 if (words[currentWordID].hasFormat) {
-                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), floor(drawX), floor(drawY));
+                    words[currentWordID].defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 }
                 else {
                     //ofSetColor(_mainColor);
@@ -331,7 +328,7 @@ void ofxTextBlock::drawCenter(float x, float y){
                     }else{
                         ofSetColor(_mainColor.r, _mainColor.g, _mainColor.b, _mainColor.a);
                     }
-                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), floor(drawX), floor(drawY));
+                    defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 }
                 //defaultFont.drawString(words[currentWordID].rawWord.c_str(), drawX, drawY);
                 currX += words[currentWordID].width;
@@ -352,6 +349,8 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     
     pos.x = x;
     pos.y = y;
+    
+    if(boxWidth == 0) boxWidth = getWidth(); // For backward compatibility (will be DEPRECIATED)
 
     updateTweenzor();
     
@@ -368,7 +367,7 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
     if (words.size() > 0) {
         alignmentShiftY = blankSpaceWord.height * scale;
         y = y + alignmentShiftY;
-        
+        //x = x + getWidth();
         for(int l=0;l < lines.size(); l++)
         {
             //Find number of spaces and width of other words;
@@ -386,7 +385,7 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 pixelsPerSpace = blankSpaceWord.width;
             }
             else {
-                pixelsPerSpace = ((boxWidth / scale) - (x / scale) - nonSpaceWordWidth) / spacesN;
+                pixelsPerSpace = ((boxWidth / scale) - nonSpaceWordWidth) / spacesN;
             }
             
 
@@ -396,7 +395,6 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
 
                 drawX = currX;
                 //drawY = defaultFont.getLineHeight() * (l + 1);
-                // TODO: Fix this issue. Maybe it is not an issue, but it seems unbalanced and confusing...
                 drawY = (defaultFont.getLineHeight() * l);
 
                 //ofSetColor(words[currentWordID].color.r, words[currentWordID].color.g, words[currentWordID].color.b, words[currentWordID].color.a);
@@ -412,7 +410,7 @@ void ofxTextBlock::drawJustified(float x, float y, float boxWidth){
                 }
                 glPushMatrix();
                 //Move to top left point using pre-scaled co-ordinates
-                glTranslatef(x, y, 0.0f);
+                ofTranslate(x, y);
                 glScalef(scale, scale, scale);
 
                 if (words[currentWordID].rawWord != " ") {
@@ -467,7 +465,7 @@ void ofxTextBlock::drawRight(float x, float y){
     if (words.size() > 0) {
         alignmentShiftY = blankSpaceWord.height * scale;
         y = y + alignmentShiftY;
-        
+        x = x + getWidth();
         for(int l=0;l < lines.size(); l++)
         {
 
@@ -848,7 +846,7 @@ float ofxTextBlock::getLineHeight(){
 }
 
 ofRectangle ofxTextBlock::getBoundingBox() {
-    return ofRectangle(pos.x - alignmentShiftX, pos.y, getWidth(), getHeight());
+    return ofRectangle(pos.x, pos.y, getWidth(), getHeight());
 }
 
 string ofxTextBlock::getText(){

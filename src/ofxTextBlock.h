@@ -115,7 +115,7 @@ class ofxTextBlock
         void    drawLeft(float x, float y);
         void    drawRight(float x, float y);
         void    drawCenter(float x, float y);
-        void    drawJustified(float x, float y, float boxWidth);
+        void    drawJustified(float x, float y, float boxWidth = 0);
 
 
         void    forceScale(float _scale);
