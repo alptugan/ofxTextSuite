@@ -18,6 +18,8 @@ void ofApp::setup(){
     //Initially wrap the text to the screen width
     //textBlock.wrapTextX(textBlockWidth);
     textBlock.wrapTextArea(ofGetWidth() - 40, ofGetHeight() - 300);
+    
+    ofSetWindowPosition(0, 0);
 }
 
 //--------------------------------------------------------------
@@ -56,12 +58,12 @@ void ofApp::draw(){
     
     // Alignment Options
     stringstream str;
-    str << "Hit `1` to set random width for the textBlock" << endl;
-    str << "Hit `2` to set full width and height for the textBlock" << endl;
-    str << "Hit `l` to set the alignment LEFT for the textBlock" << endl;
-    str << "Hit `r` to set the alignment RIGHT for the textBlock" << endl;
-    str << "Hit `c` to set the alignment CENTER for the textBlock" << endl;
-    str << "Hit `j` to set the alignment JUSTIFIED for the textBlock" << endl;
+    str << "Hit `1` to set random width for the textBlock. Keep original font size.lLi" << endl;
+    str << "Hit `2` to fit the textBlock content into specific area. This option scales the fontsize using ofScale." << endl;
+    str << "Hit `l` to set the alignment LEFT for the textBlock." << endl;
+    str << "Hit `r` to set the alignment RIGHT for the textBlock." << endl;
+    str << "Hit `c` to set the alignment CENTER for the textBlock." << endl;
+    str << "Hit `j` to set the alignment JUSTIFIED for the textBlock." << endl;
     ofDrawBitmapStringHighlight(str.str(), 20, ofGetHeight() - 100);
     
 }

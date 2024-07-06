@@ -10,6 +10,12 @@ The major update for the examples is setting the position of textBlock. Formerly
 
 ## example (basic)
 Presents all of the fundamental features of the addon. I try to keep the code backwards compatiblity as much as possible. If you used my fork all the time, you may only need to update position according to the alignment of the textBlock. 
+![](docs/example.gif)
+
+## example-textAnimation (basic)
+Presents how to animate the content of the textBlock. The following feature would be usefull for button animations, header like texts or any other dynamic content. There are two types of animation namely "fadein" and "fadeout." Scroll down to the `keyPressed()` function in the source code. The [ofxTweenzor]() is already bundled with the `ofxTextSuite`. So there is no need to import the library during the project generation. It will be included by default. 
+
+![](docs/example-textAnimation.gif)
 
 # Features
 - Fit text into a specific width and height area.
